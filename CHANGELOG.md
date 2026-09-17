@@ -1,5 +1,11 @@
 # orb-ui
 
+## 0.8.1
+
+### Patch Changes
+
+- Update the package repository metadata and README links to `exprmntl/orb-ui` after the move to Experimental Software. This packaging release has no component or adapter API changes.
+
 ## 0.8.0
 
 ### Breaking changes and migration
