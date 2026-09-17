@@ -1,5 +1,7 @@
 # orb-ui
 
+[![npm version](https://img.shields.io/npm/v/orb-ui.svg)](https://www.npmjs.com/package/orb-ui)
+
 **Voice agent UI that feels alive.**
 
 Expressive, accessible React components for realtime voice agents. Connect Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Realtime, Gemini Live, or your own voice stack through one consistent UI layer.
@@ -32,7 +34,7 @@ speaking motion. The adapter keeps microphone and output calibration separate.
 
 ## Install
 
-Install the component package:
+Install the [orb-ui package from npm](https://www.npmjs.com/package/orb-ui):
 
 ```bash
 npm install orb-ui
