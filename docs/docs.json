@@ -28,7 +28,7 @@
       },
       {
         "type": "github",
-        "href": "https://github.com/alexanderqchen/orb-ui"
+        "href": "https://github.com/exprmntl/orb-ui"
       }
     ],
     "primary": {
@@ -39,7 +39,7 @@
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/alexanderqchen/orb-ui",
+      "github": "https://github.com/exprmntl/orb-ui",
       "website": "https://orb-ui.com"
     }
   },

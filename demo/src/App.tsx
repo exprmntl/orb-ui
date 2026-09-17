@@ -6,7 +6,7 @@ import { highlightTsx } from './syntax-highlight'
 // Constants
 const STATES: OrbState[] = ['idle', 'connecting', 'listening', 'thinking', 'speaking', 'error']
 const THEMES: OrbThemeName[] = ['circle', 'bars', 'cloud', 'radial', 'debug']
-const GITHUB_REPO_URL = 'https://github.com/alexanderqchen/orb-ui'
+const GITHUB_REPO_URL = 'https://github.com/exprmntl/orb-ui'
 const NPM_PACKAGE_URL = 'https://www.npmjs.com/package/orb-ui'
 const GITHUB_STAR_COLOR = '#8bc7ff'
 
