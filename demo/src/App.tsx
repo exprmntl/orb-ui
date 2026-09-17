@@ -2101,11 +2101,7 @@ export default function App() {
         <div className="site-footer__legal">
           <span>MIT License</span>
           <span>
-            Built by{' '}
-            <a href="https://alexanderqchen.com" target="_blank" rel="noreferrer">
-              Alexander Chen
-            </a>{' '}
-            and{' '}
+            A product by{' '}
             <a href="https://www.experimental.software/" target="_blank" rel="noreferrer">
               Experimental Software
             </a>
