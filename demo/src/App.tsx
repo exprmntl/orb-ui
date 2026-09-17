@@ -7,6 +7,7 @@ import { highlightTsx } from './syntax-highlight'
 const STATES: OrbState[] = ['idle', 'connecting', 'listening', 'thinking', 'speaking', 'error']
 const THEMES: OrbThemeName[] = ['circle', 'bars', 'cloud', 'radial', 'debug']
 const GITHUB_REPO_URL = 'https://github.com/alexanderqchen/orb-ui'
+const NPM_PACKAGE_URL = 'https://www.npmjs.com/package/orb-ui'
 const GITHUB_STAR_COLOR = '#8bc7ff'
 
 type DemoMode = 'simulation' | 'manual'
@@ -626,6 +627,21 @@ export default function App() {
           flex-wrap: wrap;
           gap: 12px;
           margin-top: 34px;
+        }
+
+        .hero-copy__package-link {
+          color: #858585;
+          display: inline-flex;
+          font-size: 13px;
+          gap: 6px;
+          margin-top: 14px;
+          text-decoration: none;
+          transition: color 160ms ease;
+        }
+
+        .hero-copy__package-link:hover,
+        .hero-copy__package-link:focus-visible {
+          color: #fff;
         }
 
         .install-command {
@@ -1757,6 +1773,15 @@ export default function App() {
               </a>
             </div>
 
+            <a
+              href={NPM_PACKAGE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="hero-copy__package-link"
+            >
+              View package on npm <span aria-hidden="true">↗</span>
+            </a>
+
             <div className="hero-providers" aria-label="Supported provider guides">
               <span>Native paths</span>
               {PROVIDER_GUIDES.slice(0, 6).map((provider) => (
@@ -2058,7 +2083,7 @@ export default function App() {
             <h2>Product</h2>
             <a href="/docs">Documentation</a>
             <a href="/playground">Playground</a>
-            <a href="https://www.npmjs.com/package/orb-ui" target="_blank" rel="noreferrer">
+            <a href={NPM_PACKAGE_URL} target="_blank" rel="noreferrer">
               npm package
             </a>
           </div>
