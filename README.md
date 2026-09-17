@@ -13,7 +13,7 @@ Expressive, accessible React components for realtime voice agents. Connect Vapi,
 </p>
 
 <p align="center">
-  <a href="https://orb-ui.com">Live demo</a> · <a href="https://orb-ui.com/docs">Documentation</a> · <a href="https://orb-ui.com/playground">Playground</a> · <a href="https://www.npmjs.com/package/orb-ui">npm</a> · <a href="https://github.com/alexanderqchen/orb-ui">Star on GitHub</a>
+  <a href="https://orb-ui.com">Live demo</a> · <a href="https://orb-ui.com/docs">Documentation</a> · <a href="https://orb-ui.com/playground">Playground</a> · <a href="https://www.npmjs.com/package/orb-ui">npm</a> · <a href="https://github.com/exprmntl/orb-ui">Star on GitHub</a>
 </p>
 
 ```jsx
@@ -355,7 +355,7 @@ the orb with the typed style variable:
 ## Development
 
 ```bash
-git clone https://github.com/alexanderqchen/orb-ui.git
+git clone https://github.com/exprmntl/orb-ui.git
 cd orb-ui
 pnpm install
 

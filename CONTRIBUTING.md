@@ -52,7 +52,7 @@ That's it.
 ## Getting Started
 
 ```bash
-git clone https://github.com/alexanderqchen/orb-ui.git
+git clone https://github.com/exprmntl/orb-ui.git
 cd orb-ui
 pnpm install
 

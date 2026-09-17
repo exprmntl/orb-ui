@@ -109,7 +109,7 @@
   "homepage": "https://orb-ui.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alexanderqchen/orb-ui.git"
+    "url": "https://github.com/exprmntl/orb-ui.git"
   },
   "packageManager": "pnpm@10.33.1",
   "typesVersions": {
