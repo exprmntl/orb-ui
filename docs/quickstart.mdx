@@ -19,7 +19,7 @@ npm install orb-ui @pipecat-ai/client-js @pipecat-ai/small-webrtc-transport
 npm install orb-ui @google/genai
 ```
 
-OpenAI Realtime uses browser WebRTC and does not require an additional client SDK. Standard OpenAI
+OpenAI Live and Realtime use browser WebRTC and do not require an additional client SDK. Standard OpenAI
 and Gemini API keys stay on your server. See the [adapter overview](/adapters/overview) for a concise
 comparison of what each provider setup requires.
 
@@ -130,27 +130,34 @@ export function PipecatVoiceUI() {
 
 See the [Pipecat adapter guide](/adapters/pipecat) for Pipecat Cloud and Daily.
 
-## OpenAI Realtime
+## OpenAI GPT-Live
 
 ```tsx
 import { Orb } from 'orb-ui'
-import { createOpenAIRealtimeAdapter } from 'orb-ui/adapters'
+import { createOpenAILiveAdapter } from 'orb-ui/adapters'
 
-const adapter = createOpenAIRealtimeAdapter({
-  getClientSecret: async () => {
-    const response = await fetch('/api/openai-realtime-token', { method: 'POST' })
-    const data = await response.json()
-    return data.value
+const adapter = createOpenAILiveAdapter({
+  createSession: async (sdp, signal) => {
+    const response = await fetch('/api/openai-live-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sdp }),
+      signal,
+    })
+    if (!response.ok) throw new Error('Could not create a Live session')
+    return response.json()
   },
 })
 
-export function OpenAIRealtimeVoiceUI() {
-  return <Orb adapter={adapter} theme="circle" aria-label="Start OpenAI assistant" />
+export function OpenAILiveVoiceUI() {
+  return <Orb adapter={adapter} theme="circle" aria-label="Start GPT-Live assistant" />
 }
 ```
 
-The endpoint must mint short-lived credentials with your server-only API key. See the
-[OpenAI Realtime adapter guide](/adapters/openai-realtime).
+Your server creates a `gpt-live-1` session and returns its session ID and SDP answer. Follow the
+[OpenAI Live guide](/adapters/openai-live) for the server endpoint and delegation setup.
+For existing Realtime sessions, keep using
+[`createOpenAIRealtimeAdapter({ getClientSecret })`](/adapters/openai-realtime).
 
 ## Gemini Live
 

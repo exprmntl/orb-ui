@@ -4,7 +4,7 @@
 
 **Voice agent UI that feels alive.**
 
-Expressive, accessible React components for realtime voice agents. Connect Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Realtime, Gemini Live, or your own voice stack through one consistent UI layer.
+Expressive, accessible React components for realtime voice agents. Connect Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Live, OpenAI Realtime, Gemini Live, or your own voice stack through one consistent UI layer.
 
 <p align="center">
   <a href="https://orb-ui.com">
@@ -55,7 +55,7 @@ npm install orb-ui livekit-client
 # Pipecat (choose the transport used by your agent)
 npm install orb-ui @pipecat-ai/client-js @pipecat-ai/small-webrtc-transport
 
-# OpenAI Realtime uses browser WebRTC and has no additional client SDK
+# OpenAI Live and Realtime use browser WebRTC and need no additional client SDK
 npm install orb-ui
 
 # Gemini Live
@@ -80,6 +80,7 @@ The only difference is how the adapter obtains a provider session:
 | [ElevenLabs guide](https://orb-ui.com/docs/adapters/elevenlabs)           | Pass `Conversation` plus an `agentId`, signed URL, or conversation token |
 | [LiveKit guide](https://orb-ui.com/docs/adapters/livekit)                 | Provide a token endpoint and optional agent name                         |
 | [Pipecat guide](https://orb-ui.com/docs/adapters/pipecat)                 | Pass a configured `PipecatClient` plus its connect callback              |
+| [OpenAI Live guide](https://orb-ui.com/docs/adapters/openai-live)         | Exchange an SDP offer through your server with `createSession`           |
 | [OpenAI Realtime guide](https://orb-ui.com/docs/adapters/openai-realtime) | Return a fresh short-lived client secret from `getClientSecret`          |
 | [Gemini Live guide](https://orb-ui.com/docs/adapters/gemini-live)         | Open the official Google Live session in `connect`                       |
 
@@ -165,6 +166,29 @@ function App() {
 The Pipecat adapter consumes the standard RTVI event surface and meters the client media tracks as
 a browser fallback, so it works with Pipecat Cloud, Daily, SmallWebRTC, and transports that emit
 sparse audio-level events. See the [Pipecat guide](https://orb-ui.com/docs/adapters/pipecat).
+
+### With OpenAI GPT-Live
+
+```tsx
+import { createOpenAILiveAdapter } from 'orb-ui/adapters'
+
+const adapter = createOpenAILiveAdapter({
+  createSession: async (sdp, signal) => {
+    const response = await fetch('/api/openai-live-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sdp }),
+      signal,
+    })
+    if (!response.ok) throw new Error('Could not create a Live session')
+    return response.json()
+  },
+})
+```
+
+Your server creates a `gpt-live-1` session through `/v1/live/sessions` and returns the session ID
+and SDP answer. Live handles listening and speaking concurrently; configure backend delegation
+on your server. See the [OpenAI Live guide](https://orb-ui.com/docs/adapters/openai-live).
 
 ### With OpenAI Realtime
 
@@ -348,6 +372,7 @@ the orb with the typed style variable:
 | [ElevenLabs](https://elevenlabs.io/conversational-ai)                     | `createElevenLabsAdapter` from `orb-ui/adapters`                    |
 | [LiveKit](https://livekit.io)                                             | `createLiveKitAdapter` from `orb-ui/adapters`                       |
 | [Pipecat](https://pipecat.ai)                                             | `createPipecatAdapter` from `orb-ui/adapters`                       |
+| [OpenAI GPT-Live](https://developers.openai.com/api/docs/guides/live)     | `createOpenAILiveAdapter` from `orb-ui/adapters`                    |
 | [OpenAI Realtime](https://developers.openai.com/api/docs/guides/realtime) | `createOpenAIRealtimeAdapter` from `orb-ui/adapters`                |
 | [Gemini Live](https://ai.google.dev/gemini-api/docs/live-api)             | `createGeminiLiveAdapter` from `orb-ui/adapters`                    |
 | Custom                                                                    | Use controlled mode with a directional `signal` or build an adapter |

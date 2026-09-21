@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { fileURLToPath, URL } from 'node:url'
+import { openAILiveDevPlugin } from './openai-live-dev'
 
 function resolveInput(path: string) {
   return fileURLToPath(new URL(path, import.meta.url))
@@ -34,7 +35,7 @@ function playgroundRoutePlugin(): Plugin {
 }
 
 export default defineConfig({
-  plugins: [react(), playgroundRoutePlugin()],
+  plugins: [react(), playgroundRoutePlugin(), openAILiveDevPlugin()],
   build: {
     rollupOptions: {
       input: {

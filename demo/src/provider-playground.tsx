@@ -15,6 +15,7 @@ import {
   createElevenLabsAdapter,
   createGeminiLiveAdapter,
   createLiveKitAdapter,
+  createOpenAILiveAdapter,
   createOpenAIRealtimeAdapter,
   createPipecatAdapter,
   createVapiAdapter,
@@ -31,7 +32,15 @@ import type {
 } from 'orb-ui/adapters'
 import './provider-playground.css'
 
-type ProviderId = 'manual' | 'vapi' | 'elevenlabs' | 'livekit' | 'pipecat' | 'openai' | 'gemini'
+type ProviderId =
+  | 'manual'
+  | 'vapi'
+  | 'elevenlabs'
+  | 'livekit'
+  | 'pipecat'
+  | 'openai-live'
+  | 'openai'
+  | 'gemini'
 type LiveKitConnectionMode = 'sandbox' | 'endpoint' | 'raw'
 type PipecatConnectionMode = 'cloud' | 'small-webrtc'
 type CalibratableProviderId = Exclude<ProviderId, 'manual'>
@@ -56,6 +65,10 @@ interface ProviderConfig {
   pipecatAgentName: string
   pipecatWebrtcUrl: string
   openAIApiKey: string
+  openAILiveApiKey: string
+  openAILiveModel: string
+  openAILiveBackendModel: string
+  openAILiveInstructions: string
   openAIModel: string
   openAIVoice: string
   openAIInstructions: string
@@ -81,6 +94,7 @@ const PROVIDERS: Array<{ id: ProviderId; label: string }> = [
   { id: 'elevenlabs', label: 'ElevenLabs' },
   { id: 'livekit', label: 'LiveKit' },
   { id: 'pipecat', label: 'Pipecat' },
+  { id: 'openai-live', label: 'OpenAI GPT-Live' },
   { id: 'openai', label: 'OpenAI Realtime' },
   { id: 'gemini', label: 'Gemini Live' },
 ]
@@ -106,6 +120,10 @@ const THEME_MODES: Array<{ id: ThemeMode; label: string }> = [
 const STATES: OrbState[] = ['idle', 'connecting', 'listening', 'thinking', 'speaking', 'error']
 const DEFAULT_LIVEKIT_ROOM_PREFIX = 'orb-ui-playground'
 const DEFAULT_OPENAI_MODEL = 'gpt-realtime-2.1'
+const DEFAULT_OPENAI_LIVE_MODEL = 'gpt-live-1'
+const DEFAULT_OPENAI_LIVE_BACKEND = 'gpt-5.6-terra'
+const DEFAULT_OPENAI_LIVE_INSTRUCTIONS =
+  'You are a concise, friendly voice assistant. Respond naturally, honor interruptions, and delegate factual questions to the backend.'
 const DEFAULT_OPENAI_VOICE = 'marin'
 const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-live-preview'
 const DEFAULT_GEMINI_VOICE = 'Kore'
@@ -120,6 +138,7 @@ const CALIBRATABLE_PROVIDERS: CalibratableProviderId[] = [
   'elevenlabs',
   'livekit',
   'pipecat',
+  'openai-live',
   'openai',
   'gemini',
 ]
@@ -259,7 +278,9 @@ function isCalibratableProvider(provider: ProviderId): provider is CalibratableP
 }
 
 function supportsDirection(provider: CalibratableProviderId, direction: VolumeDirection) {
-  return Boolean(PROVIDER_VOLUME_CALIBRATIONS[provider][direction])
+  return Boolean(
+    PROVIDER_VOLUME_CALIBRATIONS[provider === 'openai-live' ? 'openai' : provider][direction],
+  )
 }
 
 function copyCalibration(calibration: VolumeCalibration): VolumeCalibration {
@@ -284,6 +305,7 @@ function copyProviderCalibrations(): CalibrationByProvider {
     elevenlabs: copyDirectionalCalibration(PROVIDER_VOLUME_CALIBRATIONS.elevenlabs),
     livekit: copyDirectionalCalibration(PROVIDER_VOLUME_CALIBRATIONS.livekit),
     pipecat: copyDirectionalCalibration(PROVIDER_VOLUME_CALIBRATIONS.pipecat),
+    'openai-live': copyDirectionalCalibration(PROVIDER_VOLUME_CALIBRATIONS.openai),
     openai: copyDirectionalCalibration(PROVIDER_VOLUME_CALIBRATIONS.openai),
     gemini: copyDirectionalCalibration(PROVIDER_VOLUME_CALIBRATIONS.gemini),
   }
@@ -436,6 +458,12 @@ function readStoredConfig(): Partial<ProviderConfig> {
     if (!isRecord(parsed)) return {}
 
     const storedConfig: Partial<ProviderConfig> = {}
+    if (typeof parsed.openAILiveModel === 'string')
+      storedConfig.openAILiveModel = parsed.openAILiveModel
+    if (typeof parsed.openAILiveBackendModel === 'string')
+      storedConfig.openAILiveBackendModel = parsed.openAILiveBackendModel
+    if (typeof parsed.openAILiveInstructions === 'string')
+      storedConfig.openAILiveInstructions = parsed.openAILiveInstructions
     if (typeof parsed.vapiPublicKey === 'string') storedConfig.vapiPublicKey = parsed.vapiPublicKey
     if (typeof parsed.vapiAssistantId === 'string') {
       storedConfig.vapiAssistantId = parsed.vapiAssistantId
@@ -542,7 +570,14 @@ function writeStoredConfig(
   try {
     storage.setItem(
       CONFIG_STORAGE_KEY,
-      JSON.stringify({ ...config, provider, theme, themePreset, themeMode }),
+      JSON.stringify({
+        ...config,
+        openAILiveApiKey: undefined,
+        provider,
+        theme,
+        themePreset,
+        themeMode,
+      }),
     )
   } catch {
     // Storage can be disabled or full in some browser modes.
@@ -567,6 +602,10 @@ function readEnvConfig(): ProviderConfig {
     pipecatAgentName: import.meta.env.VITE_PIPECAT_AGENT_NAME ?? '',
     pipecatWebrtcUrl: import.meta.env.VITE_PIPECAT_WEBRTC_URL ?? '',
     openAIApiKey: '',
+    openAILiveApiKey: '',
+    openAILiveModel: DEFAULT_OPENAI_LIVE_MODEL,
+    openAILiveBackendModel: DEFAULT_OPENAI_LIVE_BACKEND,
+    openAILiveInstructions: DEFAULT_OPENAI_LIVE_INSTRUCTIONS,
     openAIModel: import.meta.env.VITE_OPENAI_REALTIME_MODEL ?? DEFAULT_OPENAI_MODEL,
     openAIVoice: import.meta.env.VITE_OPENAI_REALTIME_VOICE ?? DEFAULT_OPENAI_VOICE,
     openAIInstructions: import.meta.env.VITE_OPENAI_REALTIME_INSTRUCTIONS ?? DEFAULT_INSTRUCTIONS,
@@ -601,6 +640,11 @@ function normalizeConfig(config: ProviderConfig): ProviderConfig {
     pipecatAgentName: (config.pipecatAgentName ?? '').trim(),
     pipecatWebrtcUrl: (config.pipecatWebrtcUrl ?? '').trim(),
     openAIApiKey: (config.openAIApiKey ?? '').trim(),
+    openAILiveApiKey: (config.openAILiveApiKey ?? '').trim(),
+    openAILiveModel: config.openAILiveModel.trim() || DEFAULT_OPENAI_LIVE_MODEL,
+    openAILiveBackendModel: config.openAILiveBackendModel.trim() || DEFAULT_OPENAI_LIVE_BACKEND,
+    openAILiveInstructions:
+      config.openAILiveInstructions.trim() || DEFAULT_OPENAI_LIVE_INSTRUCTIONS,
     openAIModel: (config.openAIModel ?? '').trim() || DEFAULT_OPENAI_MODEL,
     openAIVoice: (config.openAIVoice ?? '').trim() || DEFAULT_OPENAI_VOICE,
     openAIInstructions: (config.openAIInstructions ?? '').trim() || DEFAULT_INSTRUCTIONS,
@@ -621,7 +665,7 @@ function createManualSignal(state: OrbState, inputVolume: number, outputVolume: 
   return { state, inputVolume: 0, outputVolume: 0 }
 }
 
-function getProviderReady(provider: ProviderId, config: ProviderConfig) {
+function getProviderReady(provider: ProviderId, config: ProviderConfig, localOpenAIKey = false) {
   if (provider === 'manual') return true
   if (provider === 'vapi') return Boolean(config.vapiPublicKey && config.vapiAssistantId)
   if (provider === 'elevenlabs') return Boolean(config.elevenLabsAgentId)
@@ -631,6 +675,7 @@ function getProviderReady(provider: ProviderId, config: ProviderConfig) {
       : Boolean(config.pipecatWebrtcUrl)
   }
   if (provider === 'openai') return Boolean(config.openAIApiKey)
+  if (provider === 'openai-live') return localOpenAIKey || Boolean(config.openAILiveApiKey)
   if (provider === 'gemini') return Boolean(config.geminiApiKey)
   if (config.liveKitConnectionMode === 'sandbox') {
     return Boolean(config.liveKitSandboxId && config.liveKitAgentName)
@@ -644,11 +689,13 @@ function getProviderReady(provider: ProviderId, config: ProviderConfig) {
 async function postProviderJson<TResponse>(
   endpoint: string,
   body: Record<string, unknown>,
+  signal?: AbortSignal,
 ): Promise<TResponse> {
   const response = await fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal,
   })
   const payload = (await response.json()) as TResponse & { error?: string }
   if (!response.ok) {
@@ -732,7 +779,30 @@ function createProviderAdapter(
     onInputSample: (sample: VolumeSample) => void
     onOutputSample: (sample: VolumeSample) => void
   },
+  localOpenAIKey = false,
 ): OrbAdapter | undefined {
+  if (provider === 'openai-live' && getProviderReady(provider, config, localOpenAIKey)) {
+    return createLazyAdapter(() =>
+      createOpenAILiveAdapter({
+        inputVolumeCalibration: volumeCalibration?.getInput,
+        outputVolumeCalibration: volumeCalibration?.getOutput,
+        onInputVolumeSample: volumeCalibration?.onInputSample,
+        onOutputVolumeSample: volumeCalibration?.onOutputSample,
+        createSession: (sdp, signal) =>
+          postProviderJson(
+            '/api/openai-live-session',
+            {
+              sdp,
+              apiKey: config.openAILiveApiKey || undefined,
+              model: config.openAILiveModel,
+              backendModel: config.openAILiveBackendModel,
+              instructions: config.openAILiveInstructions,
+            },
+            signal,
+          ),
+      }),
+    )
+  }
   if (provider === 'vapi' && getProviderReady(provider, config)) {
     return createLazyAdapter(async () => {
       const vapiModule = await import('@vapi-ai/web')
@@ -1050,11 +1120,51 @@ function ProviderConfigFields({
   config,
   provider,
   updateConfig,
+  localOpenAIKey,
 }: {
   config: ProviderConfig
   provider: Exclude<ProviderId, 'manual'>
   updateConfig: UpdateProviderConfig
+  localOpenAIKey: boolean
 }) {
+  if (provider === 'openai-live') {
+    return (
+      <>
+        {localOpenAIKey ? (
+          <p className="provider-note">Saved local OpenAI key is ready. Start a session to talk.</p>
+        ) : (
+          <ConfigField
+            id="config-openai-live-api-key"
+            label="OpenAI API key"
+            type="password"
+            value={config.openAILiveApiKey}
+            onChange={(value) => updateConfig('openAILiveApiKey', value)}
+          />
+        )}
+        <ConfigField
+          id="config-openai-live-model"
+          label="Live model"
+          value={config.openAILiveModel}
+          onChange={(value) => updateConfig('openAILiveModel', value)}
+        />
+        <ConfigField
+          id="config-openai-live-backend"
+          label="Backend model"
+          value={config.openAILiveBackendModel}
+          onChange={(value) => updateConfig('openAILiveBackendModel', value)}
+        />
+        <ConfigField
+          id="config-openai-live-instructions"
+          label="Instructions"
+          value={config.openAILiveInstructions}
+          onChange={(value) => updateConfig('openAILiveInstructions', value)}
+        />
+        <p className="provider-note">
+          Speak naturally and interrupt at any time. End the session when finished.
+        </p>
+      </>
+    )
+  }
   if (provider === 'vapi') {
     return (
       <>
@@ -1289,10 +1399,24 @@ function ProviderConfigFields({
 function ProviderReadinessRows({
   config,
   provider,
+  localOpenAIKey,
 }: {
   config: ProviderConfig
   provider: Exclude<ProviderId, 'manual'>
+  localOpenAIKey: boolean
 }) {
+  if (provider === 'openai-live') {
+    return (
+      <>
+        <EnvRow
+          label={localOpenAIKey ? 'Local OpenAI key' : 'OpenAI API key'}
+          ready={localOpenAIKey || Boolean(config.openAILiveApiKey)}
+        />
+        <EnvRow label="Live model" ready={Boolean(config.openAILiveModel)} />
+        <EnvRow label="Backend model" ready={Boolean(config.openAILiveBackendModel)} />
+      </>
+    )
+  }
   if (provider === 'vapi') {
     return (
       <>
@@ -1358,6 +1482,16 @@ function ProviderReadinessRows({
 
 function ProviderPlayground() {
   const [config, setConfig] = useState<ProviderConfig>(() => readConfig())
+  const [localOpenAIKey, setLocalOpenAIKey] = useState(false)
+  useEffect(() => {
+    if (!import.meta.env.DEV) return
+    const controller = new AbortController()
+    void fetch('/api/openai-live-status', { signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : undefined))
+      .then((result) => setLocalOpenAIKey(result?.configured === true))
+      .catch(() => {})
+    return () => controller.abort()
+  }, [])
   const [storedSelection] = useState(() => readStoredSelection())
   const [provider, setProvider] = useState<ProviderId>(storedSelection.provider)
   const [theme, setTheme] = useState<OrbThemeName>(storedSelection.theme)
@@ -1471,7 +1605,7 @@ function ProviderPlayground() {
         : undefined,
     [themeMode],
   )
-  const providerReady = getProviderReady(provider, activeConfig)
+  const providerReady = getProviderReady(provider, activeConfig, localOpenAIKey)
   const providerAdapter = useMemo(
     () =>
       createProviderAdapter(
@@ -1485,8 +1619,16 @@ function ProviderPlayground() {
               onOutputSample: recordOutputSample,
             }
           : undefined,
+        localOpenAIKey,
       ),
-    [activeConfig, getActiveCalibration, provider, recordInputSample, recordOutputSample],
+    [
+      activeConfig,
+      getActiveCalibration,
+      provider,
+      recordInputSample,
+      recordOutputSample,
+      localOpenAIKey,
+    ],
   )
 
   const updateConfig = useCallback(function updateConfig<TKey extends keyof ProviderConfig>(
@@ -1500,6 +1642,14 @@ function ProviderPlayground() {
     const defaultConfig = readEnvConfig()
 
     setConfig((current) => {
+      if (provider === 'openai-live')
+        return {
+          ...current,
+          openAILiveApiKey: '',
+          openAILiveModel: DEFAULT_OPENAI_LIVE_MODEL,
+          openAILiveBackendModel: DEFAULT_OPENAI_LIVE_BACKEND,
+          openAILiveInstructions: DEFAULT_OPENAI_LIVE_INSTRUCTIONS,
+        }
       if (provider === 'vapi') {
         return {
           ...current,
@@ -1561,6 +1711,14 @@ function ProviderPlayground() {
 
   const clearProviderConfig = useCallback(() => {
     setConfig((current) => {
+      if (provider === 'openai-live')
+        return {
+          ...current,
+          openAILiveApiKey: '',
+          openAILiveModel: DEFAULT_OPENAI_LIVE_MODEL,
+          openAILiveBackendModel: DEFAULT_OPENAI_LIVE_BACKEND,
+          openAILiveInstructions: DEFAULT_OPENAI_LIVE_INSTRUCTIONS,
+        }
       if (provider === 'vapi') {
         return { ...current, vapiPublicKey: '', vapiAssistantId: '' }
       }
@@ -2005,11 +2163,13 @@ function ProviderPlayground() {
                     config={config}
                     provider={provider}
                     updateConfig={updateConfig}
+                    localOpenAIKey={localOpenAIKey}
                   />
                 </div>
                 <p className="provider-note">
-                  Configuration, including credentials, is saved in this browser for this exact
-                  playground URL. Use Clear to remove the current provider&apos;s saved values.
+                  {provider === 'openai-live'
+                    ? 'Model settings are saved in this browser. Pasted Live keys stay in page memory; the saved local key stays on the server.'
+                    : 'Configuration, including credentials, is saved in this browser for this exact playground URL. Use Clear to remove the current provider’s saved values.'}
                 </p>
                 <div className="provider-config-actions">
                   <button className="provider-button" onClick={resetProviderConfig} type="button">
@@ -2020,7 +2180,11 @@ function ProviderPlayground() {
                   </button>
                 </div>
                 <div className="provider-env-list">
-                  <ProviderReadinessRows config={activeConfig} provider={provider} />
+                  <ProviderReadinessRows
+                    config={activeConfig}
+                    provider={provider}
+                    localOpenAIKey={localOpenAIKey}
+                  />
                 </div>
               </section>
             ) : null}

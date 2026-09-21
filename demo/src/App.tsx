@@ -108,12 +108,18 @@ export function VoiceOrb() {
 }`
 
 const OPENAI_CODE = `import { Orb } from "orb-ui"
-import { createOpenAIRealtimeAdapter } from "orb-ui/adapters"
+import { createOpenAILiveAdapter } from "orb-ui/adapters"
 
-const adapter = createOpenAIRealtimeAdapter({
-  getClientSecret: async () => {
-    const response = await fetch("/api/openai-realtime-token", { method: "POST" })
-    return (await response.json()).value
+const adapter = createOpenAILiveAdapter({
+  createSession: async (sdp, signal) => {
+    const response = await fetch("/api/openai-live-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sdp }),
+      signal
+    })
+    if (!response.ok) throw new Error("Could not create a Live session")
+    return response.json()
   }
 })
 
@@ -226,7 +232,7 @@ const NAV_LINKS = [
 ] as const
 
 const PROOF_POINTS = [
-  { value: '6+', label: 'Provider paths', detail: 'Plus controlled mode' },
+  { value: '7', label: 'Provider paths', detail: 'Plus controlled mode' },
   { value: '2-way', label: 'Audio response', detail: 'Input and output levels' },
   { value: 'A11y', label: 'Accessible controls', detail: 'Keyboard-ready semantics' },
   { value: 'MIT', label: 'Open source', detail: 'Use it anywhere' },
@@ -265,8 +271,8 @@ const CODE_OPTIONS: ReadonlyArray<{
   {
     id: 'openai',
     label: 'OpenAI',
-    detail: 'Realtime',
-    description: 'Use native browser WebRTC with short-lived client secrets.',
+    detail: 'GPT-Live',
+    description: 'Connect GPT-Live through a server-created WebRTC session.',
   },
   {
     id: 'gemini',
@@ -293,7 +299,7 @@ const SEO_SECTIONS = [
   {
     id: 'adapters',
     title: 'Provider adapters',
-    copy: 'Use adapters for Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Realtime, and Gemini Live.',
+    copy: 'Use adapters for Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Live, OpenAI Realtime, and Gemini Live.',
     link: '/docs/adapters/overview',
     linkLabel: 'Explore adapters',
   },
@@ -315,7 +321,7 @@ const SEO_SECTIONS = [
     id: 'roadmap',
     title: 'Native realtime voice adapters',
     copy: 'Drive the UI from managed browser audio, provider state, and separate input/output levels.',
-    link: '/docs/adapters/openai-realtime',
+    link: '/docs/adapters/openai-live',
     linkLabel: 'OpenAI setup',
   },
 ] as const
@@ -325,6 +331,7 @@ const PROVIDER_GUIDES = [
   { href: '/docs/adapters/elevenlabs', label: 'ElevenLabs', detail: 'Conversational AI' },
   { href: '/docs/adapters/livekit', label: 'LiveKit', detail: 'Agents' },
   { href: '/docs/adapters/pipecat', label: 'Pipecat', detail: 'RTVI' },
+  { href: '/docs/adapters/openai-live', label: 'OpenAI GPT-Live', detail: 'Full duplex' },
   { href: '/docs/adapters/openai-realtime', label: 'OpenAI Realtime', detail: 'WebRTC' },
   { href: '/docs/adapters/gemini-live', label: 'Gemini Live', detail: 'Live API' },
   { href: '/docs/adapters/custom', label: 'Custom voice stack', detail: 'Controlled mode' },
@@ -1784,11 +1791,13 @@ export default function App() {
 
             <div className="hero-providers" aria-label="Supported provider guides">
               <span>Native paths</span>
-              {PROVIDER_GUIDES.slice(0, 6).map((provider) => (
-                <a key={provider.href} href={provider.href}>
-                  {provider.label}
-                </a>
-              ))}
+              {PROVIDER_GUIDES.filter((provider) => provider.href !== '/docs/adapters/custom').map(
+                (provider) => (
+                  <a key={provider.href} href={provider.href}>
+                    {provider.label}
+                  </a>
+                ),
+              )}
             </div>
           </div>
 

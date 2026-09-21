@@ -8,6 +8,7 @@ import type { OrbThemeRenderer } from '../../src'
 import {
   createElevenLabsAdapter,
   createGeminiLiveAdapter,
+  createOpenAILiveAdapter,
   createOpenAIRealtimeAdapter,
   createPipecatAdapter,
   createVapiAdapter,
@@ -61,6 +62,23 @@ const pipecatAdapter = createPipecatAdapter(pipecatClient, {
   connect: () => pipecatClient.connect({ webrtcUrl: 'https://agent.example.com/api/offer' }),
   outputVolumeCalibration: () => ({ amplitude: { speechPeak: 0.35 } }),
   onOutputVolumeSample: ({ raw }) => void raw,
+})
+
+const openAILiveAdapter = createOpenAILiveAdapter({
+  createSession: async (sdp, signal) => {
+    const response = await fetch('/api/openai-live-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sdp }),
+      signal,
+    })
+    if (!response.ok) throw new Error('Could not create a Live session')
+    return response.json()
+  },
+  onEvent: (event) => {
+    const type: string = event.type
+    void type
+  },
 })
 
 const openAIRealtimeAdapter = createOpenAIRealtimeAdapter({
@@ -164,6 +182,7 @@ export function ProviderAdapterSmokeExamples() {
         aria-label="Start token-based ElevenLabs voice assistant"
       />
       <Orb adapter={liveKitAdapter} theme="circle" aria-label="Start LiveKit voice assistant" />
+      <Orb adapter={openAILiveAdapter} theme="circle" aria-label="Start GPT-Live assistant" />
       <Orb adapter={pipecatAdapter} theme="circle" aria-label="Start Pipecat voice assistant" />
       <Orb
         adapter={openAIRealtimeAdapter}

@@ -8,7 +8,7 @@ assistant is doing. It should make connecting, listening, thinking, speaking, in
 failure understandable without forcing users to interpret an animation on its own.
 
 orb-ui gives React teams that layer through animated voice orbs, audio-reactive themes, provider
-adapters, and controlled state. Use it with Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Realtime,
+adapters, and controlled state. Use it with Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Live, OpenAI Realtime,
 Gemini Live, or a custom browser voice stack.
 
 ## Build a React voice agent UI
@@ -57,7 +57,7 @@ orb-ui models the core lifecycle as:
 - `speaking`
 - `error`
 
-Those states map cleanly to Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Realtime, Gemini Live, and custom WebRTC or WebSocket voice pipelines.
+Those states map cleanly to Vapi, ElevenLabs, LiveKit, Pipecat, OpenAI Live, OpenAI Realtime, Gemini Live, and custom WebRTC or WebSocket voice pipelines.
 
 | State        | Question the UI should answer           | Useful visual treatment                                  |
 | ------------ | --------------------------------------- | -------------------------------------------------------- |
@@ -180,6 +180,7 @@ evaluating a polished theme.
 | ElevenLabs      | [ElevenLabs Voice Orb UI for React](/adapters/elevenlabs)       | Let the adapter manage the conversational session and both audio levels |
 | LiveKit Agents  | [LiveKit Voice UI for React](/adapters/livekit)                 | Connect through a token endpoint and map agent participant state        |
 | Pipecat         | [Pipecat Voice UI for React](/adapters/pipecat)                 | Reuse a configured Pipecat client across supported transports           |
+| OpenAI GPT-Live | [OpenAI GPT-Live Voice UI for React](/adapters/openai-live)     | Let orb-ui own full-duplex WebRTC and audio playback                    |
 | OpenAI Realtime | [OpenAI Realtime Voice UI for React](/adapters/openai-realtime) | Let orb-ui own browser WebRTC and audio playback                        |
 | Gemini Live     | [Gemini Live Voice UI for React](/adapters/gemini-live)         | Open the official Live session with a short-lived token                 |
 | Custom stack    | [Custom Voice AI UI Integrations](/adapters/custom)             | Supply normalized state and volume or build an adapter                  |

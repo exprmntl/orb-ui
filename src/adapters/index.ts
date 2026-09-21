@@ -29,6 +29,13 @@ export {
   type PipecatTracksLike,
 } from './pipecat'
 export {
+  createOpenAILiveAdapter,
+  type OpenAILiveAdapterConfig,
+  type OpenAILiveEvent,
+  type OpenAILiveOrbAdapter,
+  type OpenAILiveSessionResponse,
+} from './openai-live'
+export {
   createOpenAIRealtimeAdapter,
   type OpenAIRealtimeAdapterConfig,
   type OpenAIRealtimeClientSecret,

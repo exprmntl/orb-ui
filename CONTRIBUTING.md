@@ -83,6 +83,13 @@ held in page memory only and exchanged for provider session credentials; they ar
 local storage or accepted through `VITE_*` variables. Self-hosted Pipecat SmallWebRTC only needs a
 public `/api/offer` URL.
 
+GPT-Live is also available in the playground. `pnpm dev:demo` serves its session endpoint locally.
+Provide `OPENAI_API_KEY` to the dev server process to use a saved server-side credential, or paste
+a test key in the GPT-Live panel for the current page session. Never use a `VITE_*` variable for
+the key. Server credentials are accepted only on same-origin loopback requests. The deployed
+endpoint requires each caller's own key. Select **OpenAI GPT-Live**, then click the orb to start
+and click it again to end the billed session. Model settings persist; pasted Live keys do not.
+
 Non-secret playground values are saved in browser local storage for that origin, and the Clear
 button removes the selected provider's values. To prefill the fields during local development,
 copy `demo/.env.example` to `demo/.env.local`, fill in non-secret `VITE_*` defaults, and restart the

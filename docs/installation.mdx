@@ -36,7 +36,7 @@ npm install orb-ui livekit-client
 # Pipecat (add the transport used by your agent)
 npm install orb-ui @pipecat-ai/client-js @pipecat-ai/small-webrtc-transport
 
-# OpenAI Realtime uses browser WebRTC and needs no additional client SDK
+# OpenAI Live and Realtime use browser WebRTC and need no additional client SDK
 npm install orb-ui
 
 # Gemini Live
@@ -47,6 +47,7 @@ npm install orb-ui @google/genai
 import {
   createElevenLabsAdapter,
   createGeminiLiveAdapter,
+  createOpenAILiveAdapter,
   createOpenAIRealtimeAdapter,
   createPipecatAdapter,
   createVapiAdapter,
@@ -65,7 +66,8 @@ Use an adapter when a supported provider owns the voice session. Use controlled 
 - Use the [ElevenLabs adapter](/adapters/elevenlabs) for ElevenLabs conversational agents.
 - Use the [LiveKit adapter](/adapters/livekit) for LiveKit Agents.
 - Use the [Pipecat adapter](/adapters/pipecat) with Pipecat Cloud, Daily, or self-hosted SmallWebRTC agents.
-- Use the [OpenAI Realtime adapter](/adapters/openai-realtime) for native browser WebRTC voice sessions.
+- Start with the [OpenAI GPT-Live adapter](/adapters/openai-live) for full-duplex voice sessions.
+- Use the [OpenAI Realtime adapter](/adapters/openai-realtime) for existing Realtime integrations.
 - Use the [Gemini Live adapter](/adapters/gemini-live) for native-audio Live API sessions.
 
 ## Next steps

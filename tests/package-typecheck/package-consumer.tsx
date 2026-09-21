@@ -4,6 +4,7 @@ import {
   createElevenLabsAdapter,
   createGeminiLiveAdapter,
   createLiveKitAdapter as createAdvancedLiveKitAdapter,
+  createOpenAILiveAdapter,
   createOpenAIRealtimeAdapter,
   createPipecatAdapter,
 } from 'orb-ui/adapters'
@@ -98,6 +99,23 @@ const pipecatAdapter = createPipecatAdapter(pipecatClient, {
   outputVolumeCalibration: { envelope: { fallTimeMs: 200 } },
 })
 
+const openAILiveAdapter = createOpenAILiveAdapter({
+  createSession: async (sdp, signal) => {
+    const response = await fetch('/api/openai-live-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sdp }),
+      signal,
+    })
+    if (!response.ok) throw new Error('Could not create a Live session')
+    return response.json()
+  },
+  onEvent: (event) => {
+    const type: string = event.type
+    void type
+  },
+})
+
 const openAIRealtimeAdapter = createOpenAIRealtimeAdapter({
   getClientSecret: async () => 'short-lived-client-secret',
 })
@@ -120,6 +138,7 @@ export function PackageConsumerSmoke() {
         theme="circle"
         aria-label="Start app-managed LiveKit assistant"
       />
+      <Orb adapter={openAILiveAdapter} theme="circle" aria-label="Start GPT-Live assistant" />
       <Orb adapter={pipecatAdapter} theme="circle" aria-label="Start Pipecat assistant" />
       <Orb adapter={openAIRealtimeAdapter} theme="circle" aria-label="Start OpenAI assistant" />
       <Orb adapter={geminiLiveAdapter} theme="circle" aria-label="Start Gemini assistant" />
