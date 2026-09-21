@@ -252,6 +252,14 @@
   ],
   "rewrites": [
     {
+      "source": "/demos/voice-orb",
+      "destination": "/demos/voice-orb/index.html"
+    },
+    {
+      "source": "/demos/voice-orb/",
+      "destination": "/demos/voice-orb/index.html"
+    },
+    {
       "source": "/playground",
       "destination": "/playground/index.html"
     },

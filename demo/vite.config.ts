@@ -14,6 +14,10 @@ function playgroundRoutePlugin(): Plugin {
         const url = request.url ?? ''
         const [pathname, query] = url.split('?')
 
+        if (pathname === '/demos/voice-orb') {
+          request.url = `/demos/voice-orb/${query ? `?${query}` : ''}`
+        }
+
         if (
           pathname === '/playground' ||
           pathname === '/provider-playground' ||
@@ -36,6 +40,7 @@ export default defineConfig({
       input: {
         main: resolveInput('./index.html'),
         playground: resolveInput('./playground/index.html'),
+        voiceOrb: resolveInput('./demos/voice-orb/index.html'),
       },
     },
   },
