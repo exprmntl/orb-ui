@@ -67,6 +67,19 @@ Cloud/Daily, self-hosted SmallWebRTC, and custom client transports. It normalize
 audio levels while leaving agent deployment and connection credentials in the application. Direct
 browser-track metering fills gaps when a transport does not emit frequent RTVI audio-level events.
 
+### OpenAI GPT-Live adapter — implemented
+
+A separate Live adapter owns browser WebRTC, concurrent input/output metering, event forwarding,
+and graceful session finalization. GPT-Live is the primary OpenAI documentation path. Session
+creation and delegation configuration stay on the application's server; Realtime remains supported.
+Protocol and lifecycle tests cover startup, playback, cancellation, failure, and shutdown. Real
+GPT-Live WebRTC sessions validate audio, interruption, delegated responses, same-adapter restart,
+and final usage on graceful shutdown using synthetic spoken input. A Chrome playground session
+also verifies physical microphone input and assistant playback; independent Live voice calibration
+remains outstanding.
+The provider playground includes GPT-Live with model settings, directional calibration, and a
+local session endpoint that can use a server-side test credential.
+
 ### OpenAI Realtime adapter — complete
 
 The OpenAI Realtime adapter owns browser WebRTC, audio playback, input/output metering, and current

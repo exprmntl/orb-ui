@@ -2,7 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { Orb, OrbThemeProvider } from 'orb-ui'
 import type { OrbAdapter, OrbSignal, OrbState, OrbThemePreset } from 'orb-ui'
-import { createElevenLabsAdapter, createLiveKitAdapter, createVapiAdapter } from 'orb-ui/adapters'
+import {
+  createElevenLabsAdapter,
+  createLiveKitAdapter,
+  createOpenAILiveAdapter,
+  createVapiAdapter,
+} from 'orb-ui/adapters'
 import { createLiveKitAdapter as createManagedLiveKitAdapter } from 'orb-ui/adapters/livekit'
 
 const IDLE_SIGNAL: OrbSignal = {
@@ -10,6 +15,9 @@ const IDLE_SIGNAL: OrbSignal = {
   inputVolume: 0,
   outputVolume: 0,
 }
+
+// Exercise the published factory against actual browser media and peer connections.
+Object.assign(window, { createOpenAILiveAdapter })
 
 function App() {
   const [adapterSignal, setAdapterSignal] = useState<OrbSignal>(IDLE_SIGNAL)
@@ -46,6 +54,7 @@ function App() {
     typeof createVapiAdapter === 'function' &&
     typeof createElevenLabsAdapter === 'function' &&
     typeof createLiveKitAdapter === 'function' &&
+    typeof createOpenAILiveAdapter === 'function' &&
     typeof createManagedLiveKitAdapter === 'function'
 
   return (

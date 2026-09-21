@@ -1,0 +1,160 @@
+---
+title: OpenAI GPT-Live Voice UI for React
+description: Connect GPT-Live to an audio-reactive React voice UI with managed WebRTC, full-duplex audio metering, and orb-ui.
+---
+
+Start here for new OpenAI GPT-Live integrations. `createOpenAILiveAdapter` owns microphone capture,
+WebRTC negotiation, audio playback, input/output metering, and session cleanup. Your server owns
+the OpenAI API key, voice model, instructions, and delegation configuration.
+
+GPT-Live uses a different API from Realtime. Use the [Realtime adapter](/adapters/openai-realtime)
+for existing Realtime sessions; changing its model or endpoint does not make it compatible with Live.
+
+## Create a session on your server
+
+The browser sends an SDP offer to your authenticated application endpoint. The server exchanges
+it with `POST /v1/live/sessions` and returns the session ID and SDP answer. This example uses
+`gpt-live-1` for speech and a Responses backend for delegated work.
+
+```ts
+export async function POST(request: Request) {
+  // Authenticate and authorize the caller using your application's session here.
+  const { sdp } = await request.json()
+  if (typeof sdp !== 'string' || !sdp.trim()) {
+    return Response.json({ error: 'An SDP offer is required' }, { status: 400 })
+  }
+  const response = await fetch('https://api.openai.com/v1/live/sessions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      session: {
+        model: 'gpt-live-1',
+        instructions: 'Be concise and friendly. Delegate factual questions to the backend.',
+        delegation: {
+          type: 'responses',
+          responses: {
+            model: 'gpt-5.6-terra',
+            instructions: 'Return concise, accurate answers for a spoken conversation.',
+          },
+        },
+      },
+      transport: { type: 'webrtc', sdp },
+    }),
+  })
+  if (!response.ok) {
+    return Response.json({ error: 'Could not create a Live session' }, { status: response.status })
+  }
+  return Response.json(await response.json(), { headers: { 'Cache-Control': 'no-store' } })
+}
+```
+
+Keep `OPENAI_API_KEY` server-only and protect session creation with your application's
+authentication and request limits. WebRTC negotiates the audio format; omit `audio.format`.
+Live sessions are billed by duration, including an initialization minimum; see the
+[official WebRTC guide](https://developers.openai.com/api/docs/guides/voice-webrtc?api=live).
+
+## Create the adapter
+
+```tsx
+import { Orb } from 'orb-ui'
+import { createOpenAILiveAdapter } from 'orb-ui/adapters'
+
+const adapter = createOpenAILiveAdapter({
+  createSession: async (sdp, signal) => {
+    const response = await fetch('/api/openai-live-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sdp }),
+      signal,
+    })
+    if (!response.ok) throw new Error('Could not create a Live session')
+    return response.json()
+  },
+})
+
+export function OpenAILiveVoiceUI() {
+  return <Orb adapter={adapter} theme="circle" aria-label="Start GPT-Live voice assistant" />
+}
+```
+
+`createSession` runs for each start and returns
+`{ session: { id }, transport: { type: 'webrtc', sdp } }`. Forward the provided `AbortSignal` to
+your fetch. No client SDK or Realtime client secret is required. `start()` resolves after both
+SDP negotiation and `session.started`; opening the data channel alone does not mean Live is ready.
+
+## Full-duplex state and volume
+
+- Connection setup → `connecting`
+- `session.started` and quiet assistant output → `listening`
+- Audible remote-track activity → `speaking`
+- Provider, playback, or connection failure → `error`
+- Confirmed `session.closed` or cancelled startup → `idle`
+
+Live can listen and speak at the same time. Both volume fields remain active, and microphone
+activity does not suppress the speaking indicator. The single orb state shows assistant playback
+when both sides are talking.
+
+Live has no per-utterance audio completion event. The adapter estimates speech activity from the
+remote audio track, with a short silence hold; captions and delegated `response.event` completion
+do not start or stop speech. It does not infer `thinking` from backend events, since backend work
+and speech run independently. Use application state alongside the orb for task progress.
+
+The adapter starts with the shared OpenAI WebRTC RMS calibration, not a separately measured Live
+voice profile. `inputVolumeCalibration`, `outputVolumeCalibration`, `onInputVolumeSample`, and
+`onOutputVolumeSample` support [directional tuning](/guides/volume-calibration). If Web Audio
+metering is unavailable or disabled, volume and inferred speaking state are unavailable; session
+events still work.
+
+## Captions and delegation
+
+Pass `onEvent(event)` to receive all JSON server events unchanged, including transcript timing,
+delegation IDs, nested Responses events, errors, usage updates, and `session.closed`.
+After startup, use `adapter.send({ type: ..., ... })` for application commands allowed by your
+server's frontend permissions. Handle custom tools on your trusted backend or sideband connection.
+The adapter does not execute tools or manage backend task state.
+
+For client delegation, supply conversation context to your own agent and return results with
+`session.commentary.append`. For Responses delegation, read inner `response.output_item.done`
+events, return function outputs with `response.item.create`, and continue with `response.create`.
+See the [delegation guide](https://developers.openai.com/api/docs/guides/live-delegation) for full
+event schemas, frontend permissions, and backend responsibilities.
+
+Do not send `session.start` on WebRTC: the HTTP request already starts the session.
+Use `adapter.stop()` to send `session.close`. It waits for `session.closed` before releasing media,
+so `onEvent` can collect final usage. Finish required delegated work before calling stop.
+On timeout or connection loss it releases resources and rejects with an error indicating that
+final usage is unconfirmed. Muting the microphone does not end a billed Live session.
+
+## Migrating from Realtime
+
+1. Replace `createOpenAIRealtimeAdapter({ getClientSecret })` with
+   `createOpenAILiveAdapter({ createSession })`.
+2. Replace your client-secret endpoint with the server-side JSON session exchange above.
+3. Split voice instructions from backend instructions and choose Responses or client delegation.
+4. Replace Realtime captions and tool handling with Live events. Remove manual audio commits and
+   voice-response triggers. Keep existing Realtime users on the unchanged Realtime adapter.
+
+This is an additive orb-ui API; no existing imports need to change. See OpenAI's
+[migration guide](https://developers.openai.com/api/docs/guides/live-migration) for the provider
+behavior changes.
+
+## Runtime options and troubleshooting
+
+`mediaStreamConstraints`, `getUserMedia`, `createPeerConnection`, `createAudioElement`, and
+`createAudioContext` allow custom browser runtimes and tests. `startTimeoutMs` defaults to 30 seconds;
+`closeTimeoutMs` defaults to 15 seconds and may need increasing for stored sessions.
+
+**No audio:** Start from a user action on HTTPS or localhost. Check microphone permission and
+autoplay; playback failures surface as an error. If you provide an audio element, keep it unmuted.
+
+**Startup fails:** Verify project access to `gpt-live-1`, backend model access, your authenticated
+session endpoint, and its JSON response. The adapter waits for ICE gathering and `session.started`.
+
+**Speaking never ends:** Do not drive playback from transcript deltas or Responses completion.
+Inspect remote audio activity and calibration; Live has no Realtime-style output buffer end event.
+
+**Stop fails:** The connection ended or timed out before `session.closed`. Resources are released,
+but final usage is unconfirmed. Start a fresh session to reconnect.

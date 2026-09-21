@@ -7,6 +7,9 @@ description: Connect OpenAI's Realtime API to an audio-reactive React voice UI w
 remote audio playback, input/output metering, interruption-aware state, and cleanup. Your server
 still owns the standard OpenAI API key and creates a short-lived Realtime client secret.
 
+For GPT-Live, start with the [OpenAI Live adapter](/adapters/openai-live). Live has its own session
+endpoint and event lifecycle; this Realtime adapter cannot connect to it by changing the model.
+
 The adapter targets the GA Realtime API. New browser integrations should use
 `/v1/realtime/client_secrets` and `/v1/realtime/calls`, not the older beta session flow.
 
@@ -115,11 +118,6 @@ guided profile generator.
 `callsUrl`, `mediaStreamConstraints`, `getUserMedia`, `createPeerConnection`, `fetch`,
 `createAudioElement`, and `createAudioContext` are available for custom browser wrappers and tests.
 Most applications only need `getClientSecret`.
-
-## ChatGPT Live
-
-This adapter targets the public OpenAI Realtime API. It does not wrap consumer ChatGPT voice
-features that do not expose a corresponding developer API.
 
 ## Troubleshooting
 
