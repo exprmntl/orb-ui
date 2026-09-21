@@ -48,10 +48,10 @@
   },
   "seo": {
     "metatags": {
-      "og:image": "https://orb-ui.com/og-image-v2.jpg",
-      "og:image:alt": "orb-ui — Voice agent UI that feels alive, with a blue animated voice orb.",
-      "twitter:image": "https://orb-ui.com/og-image-v2.jpg",
-      "twitter:image:alt": "orb-ui — Voice agent UI that feels alive, with a blue animated voice orb."
+      "og:image": "https://orb-ui.com/og-image-v3.png",
+      "og:image:alt": "orb-ui — Voice agent UI that feels alive, with its blue cloud orb.",
+      "twitter:image": "https://orb-ui.com/og-image-v3.png",
+      "twitter:image:alt": "orb-ui — Voice agent UI that feels alive, with its blue cloud orb."
     }
   },
   "integrations": {
