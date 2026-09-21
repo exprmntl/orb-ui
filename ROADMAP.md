@@ -86,6 +86,11 @@ HTML routes to their maintained equivalents, and links directly from the homepag
 use-case guides. Documentation pages use one descriptive page heading and implementation-focused
 content that stays aligned with the public API.
 
+Voice-orb discovery now builds on those routes: the homepage introduces the React voice orb while
+retaining its broader voice agent UI positioning, the ElevenLabs guide explains visual choices
+and includes a complete integration, and both provider and animation guides embed an interactive
+theme/state preview. The animation example remains a secondary homepage documentation link.
+
 ## Experience
 
 ### More impressive themes

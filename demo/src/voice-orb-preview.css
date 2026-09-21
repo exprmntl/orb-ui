@@ -1,0 +1,141 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #edf2ff;
+  background: #10131b;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+.orb-preview {
+  max-width: 760px;
+  margin: auto;
+  padding: 24px;
+}
+h1 {
+  font-size: 20px;
+  letter-spacing: -0.025em;
+  margin: 0 0 6px;
+}
+p {
+  margin: 0;
+  color: #a9b5cb;
+  font-size: 13px;
+}
+.orb-preview__surface {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+}
+.orb-preview__surface p {
+  min-height: 36px;
+}
+.orb-preview__choices,
+.orb-preview__levels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+label,
+legend {
+  font-size: 12px;
+  color: #b9c6dd;
+}
+label {
+  display: block;
+  min-width: 0;
+}
+select {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+}
+select,
+button {
+  background: #1b2230;
+  color: #edf2ff;
+  border: 1px solid #364156;
+  border-radius: 7px;
+  padding: 9px 10px;
+  font: inherit;
+  text-transform: capitalize;
+  cursor: pointer;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  margin: 20px 0;
+  min-width: 0;
+}
+legend {
+  padding: 0 0 8px;
+}
+.orb-preview__states {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.orb-preview__states button {
+  font-size: 12px;
+}
+button[aria-pressed='true'] {
+  background: #243d64;
+  border-color: #91baff;
+  color: #fff;
+}
+button:hover {
+  border-color: #91baff;
+}
+:focus-visible {
+  outline: 2px solid #91baff;
+  outline-offset: 3px;
+}
+input[type='range'] {
+  display: block;
+  accent-color: #91baff;
+  width: 100%;
+  margin: 12px 0 0;
+}
+label span {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+details {
+  margin-top: 22px;
+  border-top: 1px solid #2d3547;
+  padding-top: 16px;
+}
+summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: #b9c6dd;
+}
+pre {
+  overflow: auto;
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 12px;
+  background: #0a0d14;
+  border-radius: 8px;
+}
+@media (min-width: 600px) {
+  .orb-preview__states {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+@media (max-width: 360px) {
+  .orb-preview {
+    padding: 16px;
+  }
+  .orb-preview__choices,
+  .orb-preview__levels {
+    gap: 12px;
+  }
+}

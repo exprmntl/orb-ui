@@ -299,8 +299,8 @@ const SEO_SECTIONS = [
   },
   {
     id: 'themes',
-    title: 'Themes and voice states',
-    copy: 'Map listening, speaking, idle, and error states into polished visual themes.',
+    title: 'Voice orb animation',
+    copy: 'Try the interactive React example, tune audio response, and choose a visual theme.',
     link: '/docs/examples/voice-orb-ui',
     linkLabel: 'View example',
   },
@@ -1753,8 +1753,8 @@ export default function App() {
               Voice agent UI that feels <span>alive.</span>
             </h1>
             <p className="hero-copy__lede">
-              Give realtime voice agents a visible presence with expressive themes, clear session
-              states, and provider adapters that all end at one React component.
+              Give your voice agent a voice orb that feels like your product. One React component,
+              expressive audio-reactive themes, and adapters for ElevenLabs, Vapi, and more.
             </p>
 
             <div className="hero-copy__actions">
