@@ -8,7 +8,7 @@ Expressive, accessible React components for realtime voice agents. Connect Vapi,
 
 <p align="center">
   <a href="https://orb-ui.com">
-    <img src="demo/public/og-image-v2.jpg" alt="orb-ui — Voice agent UI that feels alive" width="900" />
+    <img src="demo/public/og-image-v3.png" alt="orb-ui — Voice agent UI that feels alive" width="900" />
   </a>
 </p>
 
