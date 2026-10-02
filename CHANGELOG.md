@@ -1,5 +1,13 @@
 # orb-ui
 
+## 0.9.1
+
+### Patch Changes
+
+- 0e78ad5: Improve the default text contrast of the debug theme's inactive state buttons and Stop button.
+  Keep selected playground buttons readable while hovered, and improve button text contrast on
+  the homepage and calibration controls.
+
 ## 0.9.0
 
 ### Minor Changes
