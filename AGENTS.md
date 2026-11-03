@@ -2,6 +2,11 @@
 
 This repo is intentionally AI-native. Follow `CONTRIBUTING.md` first, then these durable agent rules.
 
+## Publication
+
+- Keep changes local by default. Do not push branches, open PRs, or create remote preview deployments unless I explicitly authorize those actions for the task.
+- Continue implementing and verifying locally. This rule overrides personal defaults that call for automatic PRs and previews.
+
 ## PR and Release Standards
 
 - Use Conventional Commit-style PR titles.
