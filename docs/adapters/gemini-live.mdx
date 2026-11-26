@@ -7,8 +7,11 @@ description: Connect Gemini Live API native audio to an audio-reactive React voi
 metering, local turn detection, interruptions, and cleanup. Your app owns the official Google GenAI
 client and the short-lived Live API token.
 
-The examples use `gemini-3.1-flash-live-preview`, the current low-latency voice-first Live model,
-with the `Kore` voice.
+The playground defaults to `gemini-3.1-flash-live-preview` with the `Kore` voice. Google
+lists `gemini-3.8-live` as its replacement and has announced no shutdown date for the preview.
+To try the replacement with your account, set the model in the local playground or in your
+token endpoint. The examples typecheck with `@google/genai@3.6.1`, which requires Node.js 22
+or later on the server. [Google's Live API model lifecycle](https://aistudio.google.com/docs/deprecations#live-api-models)
 
 ## The simple setup
 

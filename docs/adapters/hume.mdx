@@ -1,20 +1,19 @@
 ---
-title: Hume EVI Voice UI for React
-description: Observe an existing Hume EVI VoiceProvider with an accessible React voice orb, playback-based state, directional audio activity, and a safe local preview.
+title: Hume EVI (retired)
+description: Archived React integration for replaying Hume EVI signals with orb-ui.
 ---
 
-> Requires `orb-ui@0.10.0` or later. SDK types, offline fixtures, and browser lifecycle tests have been checked. Live provider credential tests have not been run.
+Hume retired its hosted EVI API on November 13, 2026. New projects can choose another
+[voice adapter](/adapters/overview). The bridge shipped in `orb-ui@0.10.0` remains available
+for existing code and offline replay. [Hume's endpoint retirement notice](https://api.hume.ai/v0/evi/configs)
 
-Hume's `VoiceProvider` already owns EVI's microphone, WebSocket, player, and message history.
-orb-ui adds the visual React layer by observing that existing session. You can render a controlled
-orb directly from `useVoice()`, or use the session bridge when your application coordinates more
-complex lifecycle and tool events.
+The historical examples below show how `VoiceProvider` supplied state and audio levels to Orb.
 
 ## Try the local preview
 
 The embedded session uses simulated states and synthetic volume levels. It spends no provider
 credits, records no microphone, and requires no Hume account. The controls let you inspect
-connection, response, interruption, and restart behavior before adding a live backend.
+connection, response, interruption, and restart behavior offline.
 
 <iframe
   src="/demos/integrations/?provider=hume"
@@ -23,17 +22,16 @@ connection, response, interruption, and restart behavior before adding a live ba
   style={{ width: '100%', height: '680px', border: '0', borderRadius: '20px' }}
 ></iframe>
 
-## Install
+## Archived SDK versions
 
 ```bash
 npm install orb-ui@0.10.0 @humeai/voice-react@0.3.0-beta.6 hume@0.16.1
 ```
 
 Compatibility was checked against the published **0.3.0-beta.6** React SDK and **0.16.1** Hume
-TypeScript SDK on October 6, 2026. The current React package is a beta. Pin and validate upgrades
-in your own app. Neither SDK is bundled into orb-ui.
+TypeScript SDK. Both packages are now deprecated.
 
-## Working controlled React example
+## Historical controlled React example
 
 Wrap the call surface in your existing `VoiceProvider`. If your app already renders that provider,
 keep it and move only `HumeControls` beneath it. Do not mount another provider or create another
@@ -161,21 +159,10 @@ function HumeControls({
 }
 ```
 
-### Your backend contract
+### Former backend contract
 
-`POST /api/hume/session` authenticates the requesting developer or visitor and applies that
-caller's own usage budget. Use server-held Hume API and secret keys to mint a short-lived access
-token with Hume's `fetchAccessToken()`, and return `{ accessToken, configId }` to that caller only.
-Hume's OAuth token is time limited and authorizes its account; it is not a per-call or per-config
-capability. Use a caller-owned account/credential or a separately budgeted tenant, validate the
-allowed configuration server-side, and use the narrowest scope the provider supports. Keep
-responses uncached and out of logs. Never place API or secret keys in React, a public environment
-variable, a demo URL, or local storage.
-
-The endpoint belongs to the developer's application. The orb-ui preview does not provide an
-owner-funded token service or hosted proxy. Stop cancels pending token fetches; if cancellation
-occurs while Hume connects, the example disconnects that completed session before permitting a
-new start. Hume's existing provider remains responsible for audio cleanup.
+Before retirement, the application's `POST /api/hume/session` endpoint authenticated the caller
+and minted a short-lived Hume access token on the server. Offline replay needs only a snapshot.
 
 ## Signal mapping
 
@@ -249,30 +236,15 @@ A final `user_message` or `tool_call` makes the session bridge think while playb
 clears playback activity immediately, including before the next React snapshot; the provider
 still owns the actual queue interruption.
 
-## Browser behavior and recovery
-
-Run audio on HTTPS or localhost and start from a user gesture. Microphone rejection, browser
-codec/worklet failures, an expired token, or socket failure need visible copy beside the orb. Keep
-Hume's device and audio settings in your existing provider. When permissions change or a session
-fails, obtain a fresh token for an explicit retry and create a fresh session bridge if you use one.
-
-The working example keeps pending starts locked, supports End while connecting, and aborts token
-fetches plus disconnects the provider on unmount. It does not preserve token strings in local
-storage. Supply a transcript or text status so the conversation remains understandable with
-reduced motion, a screen reader, or muted playback.
-
 ## Verification
 
 Synthetic fixtures test provider playback versus transcript events, muted channels, malformed
 FFT data, thinking/tool cues, interruption, reconnects, stale observations, errors, subscription
-cleanup, and optional start/stop lifecycle. The controlled React example and current provider
-callback types are typechecked. No credentialed live EVI session was run, so verify permission,
-codec, playback, and reconnect behavior in your own authorized staging account before treating
-the integration as production proven.
+cleanup, and optional start/stop lifecycle. The React example is typechecked against the
+archived SDKs.
 
 ## Official references
 
-- [Hume's current EVI Next.js quickstart](https://dev.hume.ai/voice/docs/speech-to-speech-evi/quickstart/nextjs)
 - [Hume React SDK source](https://github.com/HumeAI/empathic-voice-api-js/tree/main/packages/react)
 - [Hume React SDK releases](https://www.npmjs.com/package/@humeai/voice-react)
 - [Hume TypeScript SDK and access-token helper](https://www.npmjs.com/package/hume)

@@ -30,13 +30,13 @@ explore the state transitions before connecting your own application.
 ## Install and choose an audio owner
 
 ```bash
-pnpm add orb-ui@0.10.0 @deepgram/agents@0.1.2
+pnpm add orb-ui@0.10.0 @deepgram/agents@0.2.0
 # For an existing React provider:
 pnpm add @deepgram/react@0.2.0
 ```
 
-The SDK versions were checked on October 6, 2026. They are application dependencies; orb-ui
-imports no Deepgram runtime. The examples below are optional live integrations using your
+The examples typecheck against these SDK versions. Your app supplies the Deepgram runtime.
+The examples below are optional live integrations using your
 application's backend and account. The public simulation above never calls a token endpoint.
 
 | Application                               | Adapter                      | Audio ownership                                              |

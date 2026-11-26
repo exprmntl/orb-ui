@@ -2,7 +2,7 @@ import type { OrbAdapter, OrbSignal, OrbSignalListener } from '../types'
 import { createVolumeNormalizer } from '../audio-level'
 import type { VolumeCalibrationSource, VolumeSample } from '../audio-level'
 
-/** The public session statuses in retell-client-js-sdk 3.0.2. */
+/** Public WebCall session statuses from retell-client-js-sdk. */
 export type RetellSessionStatus =
   | 'connecting'
   | 'live'

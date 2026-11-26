@@ -11,35 +11,35 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
       '@cartesia/cartesia-js':
-        specifier: 4.2.0
-        version: 4.2.0(ws@8.21.0)
+        specifier: 5.2.0
+        version: 5.2.0(ws@8.21.0)
       '@changesets/cli':
         specifier: ^2.31.0
         version: 2.31.0(@types/node@26.1.1)
       '@deepgram/agents':
-        specifier: 0.1.2
-        version: 0.1.2
+        specifier: 0.2.0
+        version: 0.2.0
       '@deepgram/react':
         specifier: 0.2.0
         version: 0.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@elevenlabs/client':
-        specifier: 1.9.0
-        version: 1.9.0(@types/dom-mediacapture-record@1.0.22)
+        specifier: 1.38.0
+        version: 1.38.0(@types/dom-mediacapture-record@1.0.22)
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.0)
       '@google/genai':
-        specifier: 2.11.0
-        version: 2.11.0
+        specifier: 3.6.1
+        version: 3.6.1
       '@humeai/voice-react':
         specifier: 0.3.0-beta.6
         version: 0.3.0-beta.6(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@pipecat-ai/client-js':
-        specifier: 1.12.0
-        version: 1.12.0
+        specifier: 1.17.0
+        version: 1.17.0
       '@pipecat-ai/small-webrtc-transport':
-        specifier: 1.10.5
-        version: 1.10.5(@pipecat-ai/client-js@1.12.0)
+        specifier: 1.11.3
+        version: 1.11.3(@pipecat-ai/client-js@1.17.0)
       '@playwright/test':
         specifier: 1.61.1
         version: 1.61.1
@@ -50,20 +50,20 @@ importers:
         specifier: ^18.3.7
         version: 18.3.7(@types/react@18.3.29)
       '@vapi-ai/web':
-        specifier: 2.7.0
-        version: 2.7.0
+        specifier: 3.1.1
+        version: 3.1.1
       '@vitejs/plugin-react':
         specifier: ^6.0.2
         version: 6.0.2(vite@8.0.14(@types/node@26.1.1))
       agora-agent-client-toolkit:
-        specifier: 2.10.0
-        version: 2.10.0(agora-rtc-sdk-ng@4.24.8)(agora-rtm@2.3.0(agora-rtc-sdk-ng@4.24.8))
+        specifier: 2.11.0
+        version: 2.11.0(agora-rtc-sdk-ng@4.24.10)(agora-rtm@2.3.0(agora-rtc-sdk-ng@4.24.10))
       agora-rtc-sdk-ng:
-        specifier: 4.24.8
-        version: 4.24.8
+        specifier: 4.24.10
+        version: 4.24.10
       agora-rtm:
         specifier: 2.3.0
-        version: 2.3.0(agora-rtc-sdk-ng@4.24.8)
+        version: 2.3.0(agora-rtc-sdk-ng@4.24.10)
       eslint:
         specifier: ^10.4.0
         version: 10.4.0
@@ -74,8 +74,8 @@ importers:
         specifier: 0.16.1
         version: 0.16.1
       livekit-client:
-        specifier: 2.20.0
-        version: 2.20.0(@types/dom-mediacapture-record@1.0.22)
+        specifier: 2.25.0
+        version: 2.25.0(@types/dom-mediacapture-record@1.0.22)
       prettier:
         specifier: ^3.8.3
         version: 3.8.3
@@ -86,8 +86,8 @@ importers:
         specifier: ^18.3.1
         version: 18.3.1(react@18.3.1)
       retell-client-js-sdk:
-        specifier: 3.0.2
-        version: 3.0.2(@types/dom-mediacapture-record@1.0.22)
+        specifier: 3.0.4
+        version: 3.0.4(@types/dom-mediacapture-record@1.0.22)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -107,26 +107,26 @@ importers:
   demo:
     dependencies:
       '@elevenlabs/client':
-        specifier: 1.9.0
-        version: 1.9.0(@types/dom-mediacapture-record@1.0.22)
+        specifier: 1.38.0
+        version: 1.38.0(@types/dom-mediacapture-record@1.0.22)
       '@google/genai':
-        specifier: 2.11.0
-        version: 2.11.0
+        specifier: 3.6.1
+        version: 3.6.1
       '@pipecat-ai/client-js':
-        specifier: 1.12.0
-        version: 1.12.0
+        specifier: 1.17.0
+        version: 1.17.0
       '@pipecat-ai/daily-transport':
-        specifier: 1.6.7
-        version: 1.6.7(@pipecat-ai/client-js@1.12.0)
+        specifier: 1.7.3
+        version: 1.7.3(@pipecat-ai/client-js@1.17.0)
       '@pipecat-ai/small-webrtc-transport':
-        specifier: 1.10.5
-        version: 1.10.5(@pipecat-ai/client-js@1.12.0)
+        specifier: 1.11.3
+        version: 1.11.3(@pipecat-ai/client-js@1.17.0)
       '@vapi-ai/web':
-        specifier: 2.7.0
-        version: 2.7.0
+        specifier: 3.1.1
+        version: 3.1.1
       livekit-client:
-        specifier: 2.20.0
-        version: 2.20.0(@types/dom-mediacapture-record@1.0.22)
+        specifier: 2.25.0
+        version: 2.25.0(@types/dom-mediacapture-record@1.0.22)
       orb-ui:
         specifier: workspace:*
         version: link:..
@@ -160,22 +160,34 @@ importers:
         version: 8.0.14(@types/node@26.1.1)
 
 packages:
-  '@agora-js/media@4.24.8':
+  '@agora-js/media@4.24.10':
     resolution:
       {
-        integrity: sha512-ULG18xmKeTA2P462lB+rBx46QK0bffj59e/MciCCivqVcn1ZEntFOUEnmkAOv8FzIn5wISC8tr02PZwUbinQVw==,
+        integrity: sha512-dMkPZXJ/zF2mkiXAAEG6LvkGELTXcBnkQUtfZEQGBTC5Kn5G6Lbr65JXkqlVuzMMxUhoKnDhzh8lmOs8yl5Hdw==,
       }
 
-  '@agora-js/protocol@4.24.8':
+  '@agora-js/protocol@4.24.10':
     resolution:
       {
-        integrity: sha512-DDAJnLPY2JUP1YSyFp+Lcyn3FMM6aK/vCH9jk+O6yH/r4+WmruGijqtpUk3bf4iX3Fn8EU4F92woZOIDjjgQaA==,
+        integrity: sha512-GjAJyg8tVOUolY5KA+HufCkTOh+ICtY1VHrSJ/y7ovP/N4sNmJgAntkUyh9jVD9wu4tvuB3drVic0LA5q8MHgA==,
+      }
+
+  '@agora-js/report@4.24.10':
+    resolution:
+      {
+        integrity: sha512-aWLFoQreOy/CqNH5Spi5+YaSwLvjHjtYi5xLPZILlXJmUBA4iMiLFIoasbyFk5apghXfdk/6qu8rtg/tF10bfQ==,
       }
 
   '@agora-js/report@4.24.8':
     resolution:
       {
         integrity: sha512-i4KW+Q632yDIHbRIHNK5w1AZhMUmV6Vh0bL6WxdQQdi7Pmcx2+w4k08W95li8Dcfodl6/ypRD0MbrkYqmEpcRg==,
+      }
+
+  '@agora-js/shared@4.24.10':
+    resolution:
+      {
+        integrity: sha512-aB3JI/xkJxfV6fm5U6/UOLTL6bSDz8G+JYaQoA4Pmmo+DNUD6mlQ27Wh5aVKlp2+Kw5BRb60TeXWdn+IX6E1eA==,
       }
 
   '@agora-js/shared@4.24.8':
@@ -259,10 +271,10 @@ packages:
         integrity: sha512-ckS3+vyJb5qGpEYv/s1OebUHDi/xSNtfgw1wqKZo7MR9F2z+qXr0q5XagafAG/9O0QPVIUfST0smluYSTpYFkg==,
       }
 
-  '@cartesia/cartesia-js@4.2.0':
+  '@cartesia/cartesia-js@5.2.0':
     resolution:
       {
-        integrity: sha512-v5djlNl226LSYg9Q/TecHd7ClK8He6CeXtp3uCxdiK500WMgPXkOSdd5AxokWypQDkFdiGj54455oKFNFeq5jw==,
+        integrity: sha512-QEaeJ/MRYF29O/Oy0S8DFlhJ6AxFRU98dRC6Ed0Lyq2Gznuryo1MY6UJ1zACoxR1uCOyfz6EznPR2wqGo0gxNw==,
       }
     peerDependencies:
       ws: ^8.18.0
@@ -379,17 +391,10 @@ packages:
         integrity: sha512-CdTLvIOPiCNuH71pyDu3rA+Q0n65cmAbXnwWH84rKGiFumFzkmHNT8KHTMEchcxN+Kl8I54xGUhJ7l3E7X396Q==,
       }
 
-  '@daily-co/daily-js@0.87.0':
+  '@daily-co/daily-js@0.94.0':
     resolution:
       {
-        integrity: sha512-hWHdBDvJwDeg8unz+XG9hD7xamuFi5Jmsk89ASATKL4fdTDHplpxi4PG9aaPXzBZYYLTjuxUje1K7B5uUR+gzw==,
-      }
-    engines: { node: '>=10.0.0' }
-
-  '@daily-co/daily-js@0.90.0':
-    resolution:
-      {
-        integrity: sha512-XnuuNIxLt8GOv+rFYoU+OPTSmVj+Mg9hRPK2EM6WYVY62F6rcw7vwzZBOSCisVuu1VnTIF/2J9V0VEBa83lDzw==,
+        integrity: sha512-xOWvaHPiphmZqIqvK4qmQude7bS1WhxfComd3SWRJCH5htjP8WJ3RrTfykchNwXZR8ziLy1Mr5XdzQ+KAyDHtw==,
       }
     engines: { node: '>=22.14.0' }
 
@@ -397,6 +402,12 @@ packages:
     resolution:
       {
         integrity: sha512-DLRJOGSe2c6THHLrHD67K0Kg6Le4+dqS04uRpwJBI+vGL2GjLCKX+OCyLMQskNTuDwRgRVfqleeZx4mgvtcPIw==,
+      }
+
+  '@deepgram/agents@0.2.0':
+    resolution:
+      {
+        integrity: sha512-FpyuFmrnNtpwZKGTiZOQciKGyqiIL5LWjDgOvCz7rNEqJmrjDk1uYfIIrkc+T8nW5ggu3mRhq5r/sq65w3gydA==,
       }
 
   '@deepgram/react@0.2.0':
@@ -408,6 +419,13 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
+  '@deepgram/sdk@5.15.0':
+    resolution:
+      {
+        integrity: sha512-LAmMdOHVfvyJ8hz+YI4aK+kPmfqdtmMl7O8Q63lDWVyuHx9vEyoyt+W9y3vxxaVxdOmn4zFmGYjntbNVh/KyqA==,
+      }
+    engines: { node: '>=18.0.0' }
+
   '@deepgram/sdk@5.9.0':
     resolution:
       {
@@ -415,16 +433,16 @@ packages:
       }
     engines: { node: '>=18.0.0' }
 
-  '@elevenlabs/client@1.9.0':
+  '@elevenlabs/client@1.38.0':
     resolution:
       {
-        integrity: sha512-czkbwUv7n18DoH5L9YdAKr0ATlcPSYNxhVQTfnFvAUdijvWfhwn8Ct0WHbPxX1oGwH6s1hMbPPAK+CUURHyowg==,
+        integrity: sha512-UZZG0M+hQyQq2jRaZVDxBkk7gl4a4OBYNEZVL/0YZ+saPkNJl2lWecZY7GdHrym3RC0Ep2RFvsyHJS8IBvSJ2w==,
       }
 
-  '@elevenlabs/types@0.14.0':
+  '@elevenlabs/types@0.31.0':
     resolution:
       {
-        integrity: sha512-CfpxFyNtTq9Iwm1/Hfxk+FK0QlFgsHpXcNM9jMPYrjP/kAYMFi9rgFoosdJcBGYbgkvzUL7hwT9I6WzHyNyxDg==,
+        integrity: sha512-zqKRONrRfFXzoAKhK64i/EsRUTQsagtFvQl2iJZw5KRttolzU6QhtBpuZxG+I6nmprJR8yzb9inQHY/su6AF2g==,
       }
 
   '@emnapi/core@1.10.0':
@@ -508,12 +526,12 @@ packages:
       }
     engines: { node: ^20.19.0 || ^22.13.0 || >=24 }
 
-  '@google/genai@2.11.0':
+  '@google/genai@3.6.1':
     resolution:
       {
-        integrity: sha512-d2Csf29vS0GfHc52H0MG25ccY4FKvvbDgqDlEovLrPLF8sPegWr/GGO+LMOy85/1SnX0iV0zDAW7R8SsvWg8Vg==,
+        integrity: sha512-DQIkZkl+VoZc+RUSaJ41vRuywjQDpP0t/oUf5/ddQhNW6JsPjVULW2EgHmuJ1mrr6ACtrmUdPlqtNXF1yfKySg==,
       }
-    engines: { node: '>=20.0.0' }
+    engines: { node: '>=22.0.0' }
     peerDependencies:
       '@modelcontextprotocol/sdk': ^1.25.2
     peerDependenciesMeta:
@@ -613,16 +631,10 @@ packages:
         integrity: sha512-EsshAucklmpuUAfkABPxJNhzj9v2sG7JuzFDL4ML1oJQSV14sqrpTYnsaOudMAw9yOaW53NU3QQTlUQoRs4czw==,
       }
 
-  '@livekit/protocol@1.42.2':
+  '@livekit/protocol@1.53.0':
     resolution:
       {
-        integrity: sha512-0jeCwoMJKcwsZICg5S6RZM4xhJoF78qMvQELjACJQn6/VB+jmiySQKOSELTXvPBVafHfEbMlqxUw2UR1jTXs2g==,
-      }
-
-  '@livekit/protocol@1.46.6':
-    resolution:
-      {
-        integrity: sha512-upzlHP1vi/kZ/QqALZTFskQ0ifqc2f15RKucHYOsIHJsaXvEYanG75mAb7o+Yomfs4XhQ4BaRsdY+TFHXpaqrg==,
+        integrity: sha512-dM562Q7sEQbJ9ZghjIpcVuRxRApGNwJW/JfXRub+dJT8J1cC2Tep0SyYkDzOawix7+0x969fnjXt0qEZOxkjbQ==,
       }
 
   '@manypkg/find-root@1.1.0':
@@ -673,27 +685,27 @@ packages:
         integrity: sha512-FESMOxil5Se014ui/Eq8fT5uHJo6nIRwH0PfJrZJXs6Gek3ZVFOrpUv3YIZT20m+extU98Hg1Ym72U58rlsxUQ==,
       }
 
-  '@pipecat-ai/client-js@1.12.0':
+  '@pipecat-ai/client-js@1.17.0':
     resolution:
       {
-        integrity: sha512-TKHuxTfnO5Eq9VpmSqaPsV0y9lQ+jkb7aEG5MRsmjkhxyhhOW2ljMPwMDzOt+lwS89ZRtk12FUKEaRR/+yBGGg==,
+        integrity: sha512-H56CdlaprpKpKUt0lsaIgeV7qUxKrv3MC09F2uulUWnA7UkU4QkjtnGfwbBTpppYJfuhlUHS4ChC5nwfgtD8iA==,
       }
 
-  '@pipecat-ai/daily-transport@1.6.7':
+  '@pipecat-ai/daily-transport@1.7.3':
     resolution:
       {
-        integrity: sha512-2McxtPrRGuvJY6CdNnhVoJshBWZi7Q6hAE1IiK1rGwGrUn5bly7hoQc7oMCPm/K4aRts7F6ZeP6FqRmUb+O8kQ==,
+        integrity: sha512-BFznynB6Xzs1hMTCg4IWyvXjjOzxCz+8ouwEQdf2QfFE2E59EFwtD5lqYzguCdkMQK5ku25edc6z3OY/SrNXbw==,
       }
     peerDependencies:
-      '@pipecat-ai/client-js': ~1.12.0
+      '@pipecat-ai/client-js': ~1.17.0
 
-  '@pipecat-ai/small-webrtc-transport@1.10.5':
+  '@pipecat-ai/small-webrtc-transport@1.11.3':
     resolution:
       {
-        integrity: sha512-TF2TV/GQUVuC8Pr69fG/MSvUtuwEGcPcUg/H5d8O0RmSthVief0APgC5cKuyrjh/Rtl7+AjhxxWbrkuACdxulQ==,
+        integrity: sha512-6yM0gGh0AifJw7/Ol9EHjuvszvuZUJ/8Y5/9ucTzNjnhhRNzd75VIiSOBQBDP94dzQY6dpjsqAH1Wk6KHkDY3w==,
       }
     peerDependencies:
-      '@pipecat-ai/client-js': ~1.12.0
+      '@pipecat-ai/client-js': ~1.17.0
 
   '@playwright/test@1.61.1':
     resolution:
@@ -1274,6 +1286,12 @@ packages:
         integrity: sha512-wWKOClTTiizcZhXnPY4wikVAwmdYHp8q6DmC+EJUzAMsycb7HB32Kh9RN4+0gExjmPmZSAQjgURXIGATPegAvA==,
       }
 
+  '@types/sdp-transform@2.15.0':
+    resolution:
+      {
+        integrity: sha512-ikIFF0EaYt/2XetIYYVeMj6SB52oVXFasJUXDzWHgzNJS5ep2Pbsu7f8f3Za+dEie8HQtt3Zr9mHYBpWT0XgxQ==,
+      }
+
   '@typescript-eslint/eslint-plugin@8.59.4':
     resolution:
       {
@@ -1370,12 +1388,12 @@ packages:
       }
     engines: { node: '>=22.0.0' }
 
-  '@vapi-ai/web@2.7.0':
+  '@vapi-ai/web@3.1.1':
     resolution:
       {
-        integrity: sha512-eDrEzZwRety39pCA2DyY8kvAAXnWtVXoshbX/FFf0WGDnWGvrqlX3fkK7jJrls3IpXatEf60FtZZYDhxNNEpNQ==,
+        integrity: sha512-zy72RNBYgLo4aaB3315xkhnKUolGTGyIi8hesdrZVyNmqgunlai4cr8GBa99jwOmrFcPqUEJzdvHdToajE/hKQ==,
       }
-    engines: { node: '>=18.0.0' }
+    engines: { node: '>=22.14.0' }
 
   '@vitejs/plugin-react@6.0.2':
     resolution:
@@ -1491,23 +1509,23 @@ packages:
       }
     engines: { node: '>= 14' }
 
-  agora-agent-client-toolkit@2.10.0:
+  agora-agent-client-toolkit@2.11.0:
     resolution:
       {
-        integrity: sha512-IeFZiqXS146mFQLJQWf9o1K+UdQ6Wv2Agk7AfVK51XSujre/ULafYVQR0S+vAKNAFnrXsH3+zkAkCXzTW27DMA==,
+        integrity: sha512-NIa6hQ6OX05isifplOOQh7saocuELt0XC7O0tGyuhFEPLCMy7OqWNcyVcoxMIljXzIl1ACHEs0oc4swHgdATfw==,
       }
     engines: { node: '>=20.0.0' }
     peerDependencies:
-      agora-rtc-sdk-ng: '>=4.23.4'
+      agora-rtc-sdk-ng: '>=4.24.0'
       agora-rtm: '>=2.0.0'
     peerDependenciesMeta:
       agora-rtm:
         optional: true
 
-  agora-rtc-sdk-ng@4.24.8:
+  agora-rtc-sdk-ng@4.24.10:
     resolution:
       {
-        integrity: sha512-TkHDu1HxYcjfbvpmOfOAucSgMJRlphODQlVN6fwAMCh7yIKt6J4O3wITNCvUkEVi9aaZTjeJOZ+onFUu/zlnuw==,
+        integrity: sha512-kZLRENYEIDcpfWhy2PdxuafPSNbx12FFZz9H43WoFakEb3iZGCzlC6vkT0wL6ueD1mu57gkt4H/ttJL/9BAGaw==,
       }
 
   agora-rte-extension-ng@1.0.3:
@@ -2601,18 +2619,10 @@ packages:
       }
     engines: { node: '>= 12.0.0' }
 
-  livekit-client@2.16.1:
+  livekit-client@2.25.0:
     resolution:
       {
-        integrity: sha512-PmOHiGdkzw2P/t0vLbJRwHU59+T+JcFlGTYDV7PObWmzvypIij1Vlj0WhZKDZ/Ac7CvwWinbiGCVw/Pb/OiYYw==,
-      }
-    peerDependencies:
-      '@types/dom-mediacapture-record': ^1
-
-  livekit-client@2.20.0:
-    resolution:
-      {
-        integrity: sha512-RIJcpvBmOmwz3jTj3rmdY6Dzr55HrhcaJjMgY+HSmoEM+yIRyA40m7r8UKv0hnZWM3z/AYhP1q8C8ciz5UWFKQ==,
+        integrity: sha512-QrXeBqrTCPujCu7uMmT9DXOIYTCGz0Ig90EGJx4B05fhQX3BLZJzAbEpRqvFwhQZyQV5uf2KeYsjeVo6as1kZw==,
       }
     peerDependencies:
       '@types/dom-mediacapture-record': ^1
@@ -2669,6 +2679,13 @@ packages:
         integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==,
       }
     hasBin: true
+
+  machina@7.0.1:
+    resolution:
+      {
+        integrity: sha512-0Xkgs8NeBvO2hW6bjJT8ewLWrMfh1haMPstaghpASWjXkLjRhtDiaJG1Kb7mslaOHxZYxpH7PIjpmirRVYbMMA==,
+      }
+    engines: { node: '>=22.22' }
 
   magic-string@0.30.21:
     resolution:
@@ -3059,10 +3076,10 @@ packages:
       }
     engines: { node: '>=8' }
 
-  retell-client-js-sdk@3.0.2:
+  retell-client-js-sdk@3.0.4:
     resolution:
       {
-        integrity: sha512-Ta6FCGIruSosi+zAc1xhlgDv6+q2g/PsjowkwfZh1RUFjy9KGCyLe/TAlCDxExFqKcRfb/Rjd/qmUYJhdhMJPA==,
+        integrity: sha512-aGnvdujX49W8V4yCCfdw9eROkI5rjNeKUMeHnmXMs2nR39+bMyJMuNAe3PUwLDM3Pnwd1+K7xpQkiS6mkTvRSA==,
       }
 
   retry@0.13.1:
@@ -3313,12 +3330,6 @@ packages:
     engines: { node: '>=18.12' }
     peerDependencies:
       typescript: '>=4.8.4'
-
-  ts-debounce@4.0.0:
-    resolution:
-      {
-        integrity: sha512-+1iDGY6NmOGidq7i7xZGA4cm8DAa6fqdYcvO5Z6yBevH++Bdo9Qt/mN0TzHUgcCcKv1gmh9+W5dHqz8pMWbCbg==,
-      }
 
   tslib@2.8.1:
     resolution:
@@ -3582,10 +3593,10 @@ packages:
       }
     engines: { node: '>=6.0.0', npm: '>=3.10.0' }
 
-  webrtc-adapter@9.0.5:
+  webrtc-adapter@9.0.6:
     resolution:
       {
-        integrity: sha512-U9vjByy/sK2OMXu5mmfuZFKTMIUQe34c0JXRO+oDrxJTsntdYT2iIFwYMOV7HhMTuktcZLGf2W1N/OcSf9ssWg==,
+        integrity: sha512-CHbl2ZQbxx164IgWRgzJno4hWtM4tFbRam1QfI3Yxhs3w/DvqluVxVWeXs3oL5/fbGkSNLKo0Ty5MgUWceNhog==,
       }
     engines: { node: '>=6.0.0', npm: '>=3.10.0' }
 
@@ -3641,10 +3652,10 @@ packages:
       }
 
 snapshots:
-  '@agora-js/media@4.24.8':
+  '@agora-js/media@4.24.10':
     dependencies:
-      '@agora-js/report': 4.24.8
-      '@agora-js/shared': 4.24.8
+      '@agora-js/report': 4.24.10
+      '@agora-js/shared': 4.24.10
       agora-rte-extension: 1.2.4
       agora-rte-extension-ng: 1.0.3
       axios: 1.20.0
@@ -3653,14 +3664,22 @@ snapshots:
       - debug
       - supports-color
 
-  '@agora-js/protocol@4.24.8':
+  '@agora-js/protocol@4.24.10':
     dependencies:
-      '@agora-js/media': 4.24.8
-      '@agora-js/report': 4.24.8
-      '@agora-js/shared': 4.24.8
+      '@agora-js/media': 4.24.10
+      '@agora-js/report': 4.24.10
+      '@agora-js/shared': 4.24.10
       '@bufbuild/protobuf': 2.10.1
       '@types/pako': 2.0.4
       pako: 2.2.0
+    transitivePeerDependencies:
+      - debug
+      - supports-color
+
+  '@agora-js/report@4.24.10':
+    dependencies:
+      '@agora-js/shared': 4.24.10
+      axios: 1.20.0
     transitivePeerDependencies:
       - debug
       - supports-color
@@ -3672,6 +3691,15 @@ snapshots:
     transitivePeerDependencies:
       - debug
       - supports-color
+    optional: true
+
+  '@agora-js/shared@4.24.10':
+    dependencies:
+      axios: 1.20.0
+      ua-parser-js: 0.7.41
+    transitivePeerDependencies:
+      - debug
+      - supports-color
 
   '@agora-js/shared@4.24.8':
     dependencies:
@@ -3680,6 +3708,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
       - supports-color
+    optional: true
 
   '@azure-rest/core-client@2.9.0':
     dependencies:
@@ -3758,7 +3787,7 @@ snapshots:
 
   '@bufbuild/protobuf@2.10.1': {}
 
-  '@cartesia/cartesia-js@4.2.0(ws@8.21.0)':
+  '@cartesia/cartesia-js@5.2.0(ws@8.21.0)':
     optionalDependencies:
       ws: 8.21.0
 
@@ -3905,15 +3934,7 @@ snapshots:
       human-id: 4.1.3
       prettier: 2.8.8
 
-  '@daily-co/daily-js@0.87.0':
-    dependencies:
-      '@babel/runtime': 7.29.2
-      '@sentry/browser': 8.55.2
-      bowser: 2.14.1
-      dequal: 2.0.3
-      events: 3.3.0
-
-  '@daily-co/daily-js@0.90.0':
+  '@daily-co/daily-js@0.94.0':
     dependencies:
       '@babel/runtime': 7.29.2
       '@sentry/browser': 8.55.2
@@ -3929,11 +3950,26 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@deepgram/agents@0.2.0':
+    dependencies:
+      '@deepgram/sdk': 5.15.0
+      eventemitter3: 5.0.4
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   '@deepgram/react@0.2.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@deepgram/agents': 0.1.2
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@deepgram/sdk@5.15.0':
+    dependencies:
+      ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -3945,14 +3981,14 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  '@elevenlabs/client@1.9.0(@types/dom-mediacapture-record@1.0.22)':
+  '@elevenlabs/client@1.38.0(@types/dom-mediacapture-record@1.0.22)':
     dependencies:
-      '@elevenlabs/types': 0.14.0
-      livekit-client: 2.16.1(@types/dom-mediacapture-record@1.0.22)
+      '@elevenlabs/types': 0.31.0
+      livekit-client: 2.25.0(@types/dom-mediacapture-record@1.0.22)
     transitivePeerDependencies:
       - '@types/dom-mediacapture-record'
 
-  '@elevenlabs/types@0.14.0': {}
+  '@elevenlabs/types@0.31.0': {}
 
   '@emnapi/core@1.10.0':
     dependencies:
@@ -4004,7 +4040,7 @@ snapshots:
       '@eslint/core': 1.2.1
       levn: 0.4.1
 
-  '@google/genai@2.11.0':
+  '@google/genai@3.6.1':
     dependencies:
       google-auth-library: 10.9.0
       p-retry: 4.6.2
@@ -4071,11 +4107,7 @@ snapshots:
 
   '@livekit/mutex@1.1.1': {}
 
-  '@livekit/protocol@1.42.2':
-    dependencies:
-      '@bufbuild/protobuf': 1.10.1
-
-  '@livekit/protocol@1.46.6':
+  '@livekit/protocol@1.53.0':
     dependencies:
       '@bufbuild/protobuf': 1.10.1
 
@@ -4116,7 +4148,7 @@ snapshots:
 
   '@oxc-project/types@0.132.0': {}
 
-  '@pipecat-ai/client-js@1.12.0':
+  '@pipecat-ai/client-js@1.17.0':
     dependencies:
       '@types/events': 3.0.3
       bowser: 2.14.1
@@ -4125,15 +4157,15 @@ snapshots:
       typed-emitter: 2.1.0
       uuid: 11.1.1
 
-  '@pipecat-ai/daily-transport@1.6.7(@pipecat-ai/client-js@1.12.0)':
+  '@pipecat-ai/daily-transport@1.7.3(@pipecat-ai/client-js@1.17.0)':
     dependencies:
-      '@daily-co/daily-js': 0.90.0
-      '@pipecat-ai/client-js': 1.12.0
+      '@daily-co/daily-js': 0.94.0
+      '@pipecat-ai/client-js': 1.17.0
 
-  '@pipecat-ai/small-webrtc-transport@1.10.5(@pipecat-ai/client-js@1.12.0)':
+  '@pipecat-ai/small-webrtc-transport@1.11.3(@pipecat-ai/client-js@1.17.0)':
     dependencies:
-      '@daily-co/daily-js': 0.90.0
-      '@pipecat-ai/client-js': 1.12.0
+      '@daily-co/daily-js': 0.94.0
+      '@pipecat-ai/client-js': 1.17.0
       dequal: 2.0.3
       lodash: 4.18.1
 
@@ -4371,6 +4403,8 @@ snapshots:
 
   '@types/retry@0.12.0': {}
 
+  '@types/sdp-transform@2.15.0': {}
+
   '@typescript-eslint/eslint-plugin@8.59.4(@typescript-eslint/parser@8.59.4(eslint@10.4.0)(typescript@5.9.3))(eslint@10.4.0)(typescript@5.9.3)':
     dependencies:
       '@eslint-community/regexpp': 4.12.2
@@ -4470,9 +4504,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vapi-ai/web@2.7.0':
+  '@vapi-ai/web@3.1.1':
     dependencies:
-      '@daily-co/daily-js': 0.87.0
+      '@daily-co/daily-js': 0.94.0
       events: 3.3.0
 
   '@vitejs/plugin-react@6.0.2(vite@8.0.14(@types/node@26.1.1))':
@@ -4547,23 +4581,23 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  agora-agent-client-toolkit@2.10.0(agora-rtc-sdk-ng@4.24.8)(agora-rtm@2.3.0(agora-rtc-sdk-ng@4.24.8)):
+  agora-agent-client-toolkit@2.11.0(agora-rtc-sdk-ng@4.24.10)(agora-rtm@2.3.0(agora-rtc-sdk-ng@4.24.10)):
     dependencies:
-      agora-rtc-sdk-ng: 4.24.8
+      agora-rtc-sdk-ng: 4.24.10
     optionalDependencies:
       '@agora-js/report': 4.24.8
-      agora-rtm: 2.3.0(agora-rtc-sdk-ng@4.24.8)
+      agora-rtm: 2.3.0(agora-rtc-sdk-ng@4.24.10)
       jszip: 3.10.2
     transitivePeerDependencies:
       - debug
       - supports-color
 
-  agora-rtc-sdk-ng@4.24.8:
+  agora-rtc-sdk-ng@4.24.10:
     dependencies:
-      '@agora-js/media': 4.24.8
-      '@agora-js/protocol': 4.24.8
-      '@agora-js/report': 4.24.8
-      '@agora-js/shared': 4.24.8
+      '@agora-js/media': 4.24.10
+      '@agora-js/protocol': 4.24.10
+      '@agora-js/report': 4.24.10
+      '@agora-js/shared': 4.24.10
       agora-rte-extension: 1.2.4
       agora-rte-extension-ng: 1.0.3
       axios: 1.20.0
@@ -4579,9 +4613,9 @@ snapshots:
 
   agora-rte-extension@1.2.4: {}
 
-  agora-rtm@2.3.0(agora-rtc-sdk-ng@4.24.8):
+  agora-rtm@2.3.0(agora-rtc-sdk-ng@4.24.10):
     dependencies:
-      agora-rtc-sdk-ng: 4.24.8
+      agora-rtc-sdk-ng: 4.24.10
 
   ajv@6.15.0:
     dependencies:
@@ -5180,32 +5214,20 @@ snapshots:
       lightningcss-win32-arm64-msvc: 1.32.0
       lightningcss-win32-x64-msvc: 1.32.0
 
-  livekit-client@2.16.1(@types/dom-mediacapture-record@1.0.22):
+  livekit-client@2.25.0(@types/dom-mediacapture-record@1.0.22):
     dependencies:
       '@livekit/mutex': 1.1.1
-      '@livekit/protocol': 1.42.2
+      '@livekit/protocol': 1.53.0
       '@types/dom-mediacapture-record': 1.0.22
+      '@types/sdp-transform': 2.15.0
       events: 3.3.0
       jose: 6.2.3
       loglevel: 1.9.2
-      sdp-transform: 2.15.0
-      ts-debounce: 4.0.0
-      tslib: 2.8.1
-      typed-emitter: 2.1.0
-      webrtc-adapter: 9.0.5
-
-  livekit-client@2.20.0(@types/dom-mediacapture-record@1.0.22):
-    dependencies:
-      '@livekit/mutex': 1.1.1
-      '@livekit/protocol': 1.46.6
-      '@types/dom-mediacapture-record': 1.0.22
-      events: 3.3.0
-      jose: 6.2.3
-      loglevel: 1.9.2
+      machina: 7.0.1
       sdp-transform: 2.15.0
       tslib: 2.8.1
       typed-emitter: 2.1.0
-      webrtc-adapter: 9.0.5
+      webrtc-adapter: 9.0.6
 
   local-pkg@1.2.1:
     dependencies:
@@ -5232,6 +5254,8 @@ snapshots:
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
+
+  machina@7.0.1: {}
 
   magic-string@0.30.21:
     dependencies:
@@ -5437,10 +5461,10 @@ snapshots:
 
   resolve-from@5.0.0: {}
 
-  retell-client-js-sdk@3.0.2(@types/dom-mediacapture-record@1.0.22):
+  retell-client-js-sdk@3.0.4(@types/dom-mediacapture-record@1.0.22):
     dependencies:
       eventemitter3: 5.0.4
-      livekit-client: 2.20.0(@types/dom-mediacapture-record@1.0.22)
+      livekit-client: 2.25.0(@types/dom-mediacapture-record@1.0.22)
     transitivePeerDependencies:
       - '@types/dom-mediacapture-record'
 
@@ -5598,8 +5622,6 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  ts-debounce@4.0.0: {}
-
   tslib@2.8.1: {}
 
   type-check@0.4.0:
@@ -5730,7 +5752,7 @@ snapshots:
     dependencies:
       sdp: 3.2.2
 
-  webrtc-adapter@9.0.5:
+  webrtc-adapter@9.0.6:
     dependencies:
       sdp: 3.2.2
 

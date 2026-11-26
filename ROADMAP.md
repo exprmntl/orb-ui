@@ -4,7 +4,7 @@ This roadmap is public planning, not a promise of dates or exact release content
 
 ## Near Term
 
-### Integration and recipe expansion — implemented, awaiting review
+### Integration and recipe expansion — included in 0.10.0
 
 Seven new canonical integrations cover Retell WebCall, Hume EVI, Deepgram Voice Agent, Agora
 Conversational AI, Azure Voice Live, Cartesia Managed Agents, and Amazon Nova 2 Sonic. SDK-based
@@ -17,10 +17,10 @@ search, and audio-reactive narration. Canonical pages include full examples and 
 Hosted provider proxies are disabled; live testing belongs in a developer-owned backend or local
 development harness.
 
-Remaining release gates: human review and approval, then coordinated package/documentation
-publication. Credential-based live verification and independent voice calibration for the new
-providers remain outstanding. Synthetic fixtures and SDK type compatibility do not establish live
-production reliability.
+Hume retired its hosted EVI API on November 13, 2026. Its guide is archived and its bridge
+remains available for existing code. The other six integrations still need credential-based
+live verification and independent voice calibration.
+[Hume EVI endpoint retirement notice](https://api.hume.ai/v0/evi/configs)
 
 ### Signal-based adapter API — complete
 

@@ -30,12 +30,11 @@ preview joins no Agora channel, requests no microphone, and uses no provider cre
 ## Install
 
 ```bash
-pnpm add orb-ui@0.10.0 agora-agent-client-toolkit@2.10.0 agora-rtc-sdk-ng@4.24.8 agora-rtm@2.3.0
+pnpm add orb-ui@0.10.0 agora-agent-client-toolkit@2.11.0 agora-rtc-sdk-ng@4.24.10 agora-rtm@2.3.0
 ```
 
-Versions were verified on October 6, 2026. The latest toolkit exports `AgoraVoiceAI` and retains
-`ConversationalAIAPI` as an alias. These are your application dependencies; orb-ui has no Agora
-runtime dependency. This integration uses RTM for activity and interruption events.
+The React example typechecks against these SDK versions. Your application supplies
+the toolkit, RTC and RTM. The adapter uses RTM for activity and interruption events.
 
 ## Backend contract for your application
 

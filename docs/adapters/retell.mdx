@@ -24,13 +24,11 @@ provider request, and spends no API credits. Start, interrupt, end, and replay i
 ## Install
 
 ```bash
-npm install orb-ui@0.10.0 retell-client-js-sdk@3.0.2
+npm install orb-ui@0.10.0 retell-client-js-sdk@3.0.4
 ```
 
-The adapter was checked against the published `retell-client-js-sdk` **3.0.2** declarations and
-runtime source on October 6, 2026. It uses `RetellClient.createWebCall()` and `WebCallSession`,
-rather than assuming the legacy client's events are interchangeable. The provider SDK remains an
-application dependency; orb-ui imports no Retell runtime code.
+The adapter typechecks against `retell-client-js-sdk` **3.0.4**. It uses
+`RetellClient.createWebCall()` and `WebCallSession`. Your application provides the SDK.
 
 ## Working React example
 

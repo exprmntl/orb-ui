@@ -232,13 +232,6 @@ const NAV_LINKS = [
   { href: '/playground', label: 'Playground' },
 ] as const
 
-const PROOF_POINTS = [
-  { value: '7', label: 'Provider paths', detail: 'Plus controlled mode' },
-  { value: '2-way', label: 'Audio response', detail: 'Input and output levels' },
-  { value: 'A11y', label: 'Accessible controls', detail: 'Keyboard-ready semantics' },
-  { value: 'MIT', label: 'Open source', detail: 'Use it anywhere' },
-] as const
-
 const CODE_OPTIONS: ReadonlyArray<{
   id: CodeTab
   label: string
@@ -329,7 +322,6 @@ const SEO_SECTIONS = [
 
 const PROVIDER_GUIDES = [
   { href: '/docs/adapters/retell', label: 'Retell', detail: 'Browser WebCall' },
-  { href: '/docs/adapters/hume', label: 'Hume EVI', detail: 'VoiceProvider bridge' },
   { href: '/docs/adapters/deepgram', label: 'Deepgram', detail: 'Voice Agent' },
   { href: '/docs/adapters/agora', label: 'Agora', detail: 'Conversational AI' },
   { href: '/docs/adapters/azure-voice-live', label: 'Azure Voice Live', detail: 'Session bridge' },
@@ -342,7 +334,22 @@ const PROVIDER_GUIDES = [
   { href: '/docs/adapters/openai-live', label: 'OpenAI GPT-Live', detail: 'Full duplex' },
   { href: '/docs/adapters/openai-realtime', label: 'OpenAI Realtime', detail: 'WebRTC' },
   { href: '/docs/adapters/gemini-live', label: 'Gemini Live', detail: 'Live API' },
-  { href: '/docs/adapters/custom', label: 'Custom voice stack', detail: 'Controlled mode' },
+] as const
+
+const CUSTOM_GUIDE = {
+  href: '/docs/adapters/custom',
+  label: 'Custom voice stack',
+  detail: 'Controlled mode',
+}
+const PROOF_POINTS = [
+  {
+    value: String(PROVIDER_GUIDES.length),
+    label: 'Provider paths',
+    detail: 'Plus controlled mode',
+  },
+  { value: '2-way', label: 'Audio response', detail: 'Input and output levels' },
+  { value: 'A11y', label: 'Accessible controls', detail: 'Keyboard-ready semantics' },
+  { value: 'MIT', label: 'Open source', detail: 'Use it anywhere' },
 ] as const
 
 const USE_CASE_GUIDES = [
@@ -1800,13 +1807,11 @@ export default function App() {
 
             <div className="hero-providers" aria-label="Supported provider guides">
               <span>Native paths</span>
-              {PROVIDER_GUIDES.filter((provider) => provider.href !== '/docs/adapters/custom').map(
-                (provider) => (
-                  <a key={provider.href} href={provider.href}>
-                    {provider.label}
-                  </a>
-                ),
-              )}
+              {PROVIDER_GUIDES.map((provider) => (
+                <a key={provider.href} href={provider.href}>
+                  {provider.label}
+                </a>
+              ))}
             </div>
           </div>
 
@@ -2047,7 +2052,7 @@ export default function App() {
                   <span>Choose your stack</span>
                 </div>
                 <div className="docs-index-grid">
-                  {PROVIDER_GUIDES.map((guide) => (
+                  {[...PROVIDER_GUIDES, CUSTOM_GUIDE].map((guide) => (
                     <a key={guide.href} href={guide.href} className="docs-index-link">
                       <span>
                         <span className="docs-index-link__label">{guide.label}</span>

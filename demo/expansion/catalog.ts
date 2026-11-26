@@ -1,6 +1,6 @@
 export const integrations = [
   ['retell', 'Retell WebCall', 'Session events and audio snapshots'],
-  ['hume', 'Hume EVI', 'Observe an existing VoiceProvider'],
+  ['hume', 'Hume EVI (retired)', 'Replay historical voice signals'],
   ['deepgram', 'Deepgram Voice Agent', 'Browser session and React bridge'],
   ['agora', 'Agora Conversational AI', 'Toolkit and app-owned RTC audio'],
   ['azure-voice-live', 'Azure Voice Live', 'JavaScript session and media bridge'],
