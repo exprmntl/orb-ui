@@ -17,6 +17,10 @@ search, and audio-reactive narration. Canonical pages include full examples and 
 Hosted provider proxies are disabled; live testing belongs in a developer-owned backend or local
 development harness.
 
+The local `qa:live` suite exercises the seven playground integrations using a recorded
+question and real provider audio. Gemini 3.8 Live and Gemini 3.8 Live Extended Thinking have
+both completed that round trip.
+
 Hume retired its hosted EVI API on November 13, 2026. Its guide is archived and its bridge
 remains available for existing code. The other six integrations still need credential-based
 live verification and independent voice calibration.

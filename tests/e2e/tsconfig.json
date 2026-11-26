@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "types": ["@playwright/test"]
   },
-  "include": ["./**/*.ts", "./**/*.tsx", "../../playwright.config.ts"]
+  "include": ["./**/*.ts", "./**/*.tsx", "../live/**/*.ts", "../../playwright.config.ts"]
 }
