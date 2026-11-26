@@ -1,0 +1,112 @@
+---
+title: Animate a React Voice Orb from a Real Microphone
+sidebarTitle: Microphone-driven orb
+description: Read a browser microphone with Web Audio, convert waveform samples into an input level, and release the mic when the user stops.
+---
+
+A microphone gives you a stream of samples. Orb UI needs one number between zero and one. This example measures the energy in a short window of audio and uses that value to animate a listening orb. The audio stays in the browser.
+
+## Try it in a React app
+
+Install `orb-ui` and save this component as `MicrophoneOrb.tsx`. Open the page on HTTPS or localhost. The **Start microphone** button gives the browser a user gesture for starting audio and asking permission.
+
+```tsx
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { Orb, type OrbSignal } from 'orb-ui'
+
+export default function MicrophoneOrb() {
+  const [signal, setSignal] = useState<OrbSignal>({ state: 'idle' })
+  const release = useRef<(() => void) | null>(null)
+  useEffect(() => () => release.current?.(), [])
+
+  async function start() {
+    if (release.current) return
+    let context: AudioContext | undefined
+    let stream: MediaStream | undefined
+    let frame = 0
+    let closed = false
+
+    function stopCapture() {
+      closed = true
+      cancelAnimationFrame(frame)
+      stream?.getTracks().forEach((track) => track.stop())
+      if (context && context.state !== 'closed') void context.close().catch(() => {})
+      release.current = null
+    }
+
+    release.current = stopCapture
+    setSignal({ state: 'connecting' })
+    try {
+      context = new AudioContext()
+      await context.resume()
+      if (closed) return
+      const acquired = await navigator.mediaDevices.getUserMedia({ audio: true })
+      if (closed) {
+        acquired.getTracks().forEach((track) => track.stop())
+        return
+      }
+      stream = acquired
+      const source = context.createMediaStreamSource(stream)
+      const analyser = context.createAnalyser()
+      analyser.fftSize = 1024
+      source.connect(analyser)
+      const samples = new Float32Array(analyser.fftSize)
+      stream.getAudioTracks()[0]?.addEventListener(
+        'ended',
+        () => {
+          if (closed) return
+          stopCapture()
+          setSignal({ state: 'idle' })
+        },
+        { once: true },
+      )
+
+      function measure() {
+        analyser.getFloatTimeDomainData(samples)
+        let energy = 0
+        for (const sample of samples) energy += sample * sample
+        const rms = Math.sqrt(energy / samples.length)
+        const inputVolume = Math.max(0, Math.min(1, (rms - 0.01) / 0.14))
+        setSignal({ state: 'listening', inputVolume })
+        frame = requestAnimationFrame(measure)
+      }
+      measure()
+    } catch {
+      if (closed) return
+      stopCapture()
+      setSignal({ state: 'error' })
+    }
+  }
+
+  const active = signal.state === 'connecting' || signal.state === 'listening'
+  return (
+    <section>
+      <Orb signal={signal} theme="radial" interactive={false} />
+      <p role="status">
+        {signal.state === 'error' ? 'Check microphone access and try again.' : signal.state}
+      </p>
+      <button type="button" disabled={active} onClick={start}>
+        Start microphone
+      </button>
+      <button
+        type="button"
+        disabled={!active}
+        onClick={() => {
+          release.current?.()
+          setSignal({ state: 'idle' })
+        }}
+      >
+        Stop
+      </button>
+    </section>
+  )
+}
+```
+
+## Tune the motion on your microphone
+
+Record a quiet room level and an ordinary speaking level by inspecting `rms` while testing. The example treats 0.01 as silence and 0.15 as full scale. Replace those two anchors with measurements from your device. The analyser has no connection to the speakers, which prevents local microphone feedback. [Web Audio waveform samples](https://developer.mozilla.org/en-US/docs/Web/API/AnalyserNode/getFloatTimeDomainData)
+
+Try speaking softly, clapping once, and pressing Stop while the permission prompt is open. When capture ends, the orb should return to idle and the microphone indicator should disappear. For a two-person conversation, measure assistant playback separately and send that level as `outputVolume` during the speaking state. [Directional volume calibration](/guides/volume-calibration) · [3D voice orb example](/examples/react-three-fiber-voice-orb)

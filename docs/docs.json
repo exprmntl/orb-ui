@@ -114,6 +114,19 @@
         ]
       },
       {
+        "group": "Implementation examples",
+        "icon": "code",
+        "pages": [
+          "examples/react-three-fiber-voice-orb",
+          "examples/microphone-voice-orb",
+          "examples/elevenlabs-nextjs-voice-widget",
+          "examples/expo-iphone-voice-orb",
+          "examples/local-websocket-voice-assistant",
+          "examples/deepgram-react-node-voice-assistant",
+          "examples/restaurant-voice-ordering"
+        ]
+      },
+      {
         "group": "Guides",
         "icon": "library",
         "pages": [
