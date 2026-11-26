@@ -1,0 +1,108 @@
+---
+title: Build a Restaurant Voice Ordering Interface in React
+sidebarTitle: Restaurant voice ordering
+description: Turn a spoken restaurant order into an editable cart, handle corrections, and require a final customer confirmation before checkout.
+---
+
+“Two masala dosas. Actually, make that one.” Those are two turns about one line item. A restaurant voice interface needs an editable order behind the conversation. Hosty is a public example of a Hindi–English ordering agent that keeps a live cart while the customer speaks. [Hosty](https://github.com/luvp21/Hosty)
+
+## Agree on the cart event
+
+Let the restaurant backend resolve menu aliases, availability, and prices. After applying a finalized turn, have it send the **entire cart** with a revision number for this order. Send the transcript in the customer's language and address items by a stable menu ID. Partial speech can update a caption without changing the cart.
+
+For example, a correction to one dosa produces a new snapshot with `quantity: 1`. The first snapshot can arrive twice or arrive late. The UI keeps the highest revision. If the server starts a different order, mount a fresh cart using the new order ID as its React key.
+
+## Try an order and a correction
+
+Install `orb-ui` in a React app and render this component. The buttons replay finalized turns in English and Hindi. They let you test the cart and review step without a restaurant backend or a microphone.
+
+```tsx
+import { useState } from 'react'
+import { Orb, type OrbSignal } from 'orb-ui'
+
+type Line = { menuId: string; name: string; quantity: number; unitPaise: number }
+type Cart = { revision: number; transcript: string; lines: Line[] }
+const dosa = { menuId: 'masala-dosa', name: 'Masala dosa', unitPaise: 12000 }
+const first: Cart = {
+  revision: 1,
+  transcript: 'Two masala dosas, please.',
+  lines: [{ ...dosa, quantity: 2 }],
+}
+const correction: Cart = {
+  revision: 2,
+  transcript: 'एक ही मसाला डोसा।',
+  lines: [{ ...dosa, quantity: 1 }],
+}
+const currency = new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' })
+
+export default function VoiceOrder({ signal = { state: 'idle' } }: { signal?: OrbSignal }) {
+  const [cart, setCart] = useState<Cart>({ revision: 0, transcript: '', lines: [] })
+  const [approvedRevision, setApprovedRevision] = useState<number | null>(null)
+  function receive(snapshot: Cart) {
+    setCart((current) => (snapshot.revision > current.revision ? snapshot : current))
+  }
+  const total = cart.lines.reduce((sum, line) => sum + line.quantity * line.unitPaise, 0)
+  const approved = cart.revision === approvedRevision
+  return (
+    <section>
+      <Orb signal={signal} theme="circle" interactive={false} size={84} />
+      <button type="button" onClick={() => receive(first)}>
+        Replay order for two
+      </button>
+      <button type="button" onClick={() => receive(correction)}>
+        Correct quantity to one
+      </button>
+      <p aria-live="polite">{cart.transcript}</p>
+      <ul>
+        {cart.lines.map((line) => (
+          <li key={line.menuId}>
+            {line.quantity} × {line.name} —{' '}
+            {currency.format((line.quantity * line.unitPaise) / 100)}
+          </li>
+        ))}
+      </ul>
+      <strong>Total {currency.format(total / 100)}</strong>
+      {cart.lines.length > 0 && (
+        <label>
+          Quantity
+          <select
+            value={cart.lines[0].quantity}
+            onChange={(event) => {
+              const quantity = Number(event.target.value)
+              setCart((current) => ({
+                revision: current.revision + 1,
+                transcript: 'Quantity edited.',
+                lines: [{ ...dosa, quantity }],
+              }))
+            }}
+          >
+            {[1, 2, 3, 4].map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
+      <button
+        type="button"
+        disabled={!cart.lines.length || approved}
+        onClick={() => setApprovedRevision(cart.revision)}
+      >
+        Confirm this cart
+      </button>
+      <p role="status">
+        {approved ? 'Cart confirmed for this demo.' : 'Review quantities before confirming.'}
+      </p>
+    </section>
+  )
+}
+```
+
+First replay the order, confirm it, then apply the correction. The total should fall from ₹240 to ₹120 and the revised cart should require confirmation again. Replay the older order. The quantity should remain one.
+
+## Connect the real voice and checkout flows
+
+Feed your backend's cart snapshots into `receive`. For a customer-facing edit control, send the requested change and display the resulting authoritative snapshot. Keep microphone state and agent playback in a separate `OrbSignal`. Pass that signal to the orb so an audible reply can animate while the customer reviews the cart. A finalized transcript alone cannot tell you whether the microphone or speakers are active. [Pipecat adapter](/adapters/pipecat) · [Microphone-driven orb](/examples/microphone-voice-orb)
+
+In production, confirmation sends the order ID and reviewed revision to the server. Recheck prices, availability, and the current revision there. Use an idempotency key for that confirmation so a network retry places one order. If a newer revision exists, show its items and ask the customer to review again. The demo's confirmation stays local.

@@ -1,0 +1,83 @@
+---
+title: Use a React Voice Orb in an Expo iPhone App
+sidebarTitle: Expo iPhone orb
+description: Render Orb UI in an Expo DOM component while native React Native controls own the voice session and send listening and speaking levels to the orb.
+---
+
+Orb UI renders web elements. In an Expo app, put the artwork in a DOM component and keep the voice session on the native side. Only the state and two meter readings cross the WebView boundary. Liora uses this pattern for its iOS cloud orb. [Liora’s component](https://github.com/joshfermano/liora-local/blob/f11ae52caf77811769e90b4dacd2b608a16e10ee/src/ui/orb/CloudOrb.tsx)
+
+## Create the web component
+
+In an existing Expo Router app with web support, run `npm install orb-ui`. Expo SDK 56 and later provide the DOM WebView. For SDK 55 and earlier, also run `npx expo install react-native-webview`. If your project has no web setup, install `@expo/metro-runtime`, `react-dom`, and `react-native-web` with `npx expo install`. [Expo DOM setup](https://docs.expo.dev/guides/dom-components/)
+
+Save this file as `components/VoiceOrb.tsx`, outside the router's `app` directory. Keep the directive on the first line. Expo consumes the optional `dom` prop to configure the native wrapper.
+
+```tsx
+'use dom'
+
+import { Orb, type OrbState } from 'orb-ui'
+import type { DOMProps } from 'expo/dom'
+
+type Props = {
+  state: OrbState
+  inputVolume: number
+  outputVolume: number
+  dom?: DOMProps
+}
+
+export default function VoiceOrb({ state, inputVolume, outputVolume }: Props) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, display: 'grid', placeItems: 'center' }}>
+      <Orb
+        signal={{ state, inputVolume, outputVolume }}
+        theme="circle"
+        size={176}
+        interactive={false}
+      />
+    </div>
+  )
+}
+```
+
+## Drive the orb from a native screen
+
+Save this screen as `app/index.tsx`, adjusting the import if your app uses `src/app`. These buttons simulate turns so you can check the bridge before starting a real call.
+
+```tsx
+import { useState } from 'react'
+import { Button, Text, View } from 'react-native'
+import type { OrbSignal } from 'orb-ui'
+import VoiceOrb from '../components/VoiceOrb'
+
+export default function VoiceScreen() {
+  const [signal, setSignal] = useState<OrbSignal>({ state: 'idle' })
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ width: 200, height: 200 }}>
+        <VoiceOrb
+          state={signal.state}
+          inputVolume={signal.inputVolume ?? 0}
+          outputVolume={signal.outputVolume ?? 0}
+          dom={{ scrollEnabled: false }}
+        />
+      </View>
+      <Text accessibilityLiveRegion="polite">Voice state: {signal.state}</Text>
+      <Button
+        title="Simulate listening"
+        onPress={() => setSignal({ state: 'listening', inputVolume: 0.35 })}
+      />
+      <Button
+        title="Simulate reply"
+        onPress={() => setSignal({ state: 'speaking', outputVolume: 0.8 })}
+      />
+      <Button title="Reset" onPress={() => setSignal({ state: 'idle' })} />
+    </View>
+  )
+}
+```
+
+## Connect native audio
+
+Replace the buttons with your native session's turn events and metering callback. Keep recorder objects, playback objects, and raw PCM buffers in native code. Send a few numeric updates per second to start and increase the rate only if motion looks stepped. For decibel meters, convert to an amplitude with `10 ** (dB / 20)`, then calibrate the quiet and ordinary speech levels. [Volume calibration](/guides/volume-calibration)
+
+Run the app on an iPhone. Switch between listening, speaking, and idle. Then background it during a turn and stop the session. Your native session owner should handle interruption, stop audio, and reset the displayed signal when capture ends. If the orb area is empty, first check that its native parent has a nonzero width and height and that the web component loads with the `circle` theme.

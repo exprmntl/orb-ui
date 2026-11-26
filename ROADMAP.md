@@ -128,6 +128,10 @@ The five articles live in the main site’s static blog at `/blog`, with links f
 relevant Mintlify provider references. Product documentation remains at `/docs`.
 Keep provider prices and API examples dated and recheck them when the providers change.
 
+The docs sidebar groups implementation examples for a React Three Fiber orb, microphone metering,
+an ElevenLabs widget, Expo on iPhone, a local WebSocket assistant, Deepgram with React and Node,
+and restaurant voice ordering.
+
 ## Experience
 
 ### More impressive themes
