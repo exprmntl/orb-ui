@@ -2,8 +2,8 @@
 
 All fifteen additions have implementation, setup instructions, a copyable typed example, and a
 canonical page with an embedded local simulation. The seven new integration exports are available
-in `orb-ui@0.10.0` and later. Live credential-based provider tests have not been run; simulated
-previews do not establish live provider reliability.
+in `orb-ui@0.10.0` and later. Deepgram and Cartesia have passed authenticated voice calls.
+Retell, Agora, Azure Voice Live, and Nova 2 Sonic still need live verification.
 
 ## Integrations
 
@@ -50,8 +50,8 @@ The expansion browser suite accepts `ORB_PREVIEW_URL` and an optional temporary
 disabled for that authenticated run.
 
 Browser coverage includes start/stop, interruption, reconnect, errors, repeated clicks,
-navigation/back, recipe switching/unmount, mobile layout and keyboard controls. No live provider
-credentials are used. Public demos only use simulated states, authored local data and committed
+navigation/back, recipe switching/unmount, mobile layout and keyboard controls. These offline
+checks use no provider credentials. Public demos only use simulated states, authored local data and committed
 audio. Public provider proxy functions reject requests before reading a body or calling upstream.
 Local developer tools require loopback access and developer-owned credentials.
 

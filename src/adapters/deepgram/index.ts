@@ -19,6 +19,7 @@ type SessionEvent =
   | 'disconnected'
   | 'settings-applied'
   | 'user-started-speaking'
+  | 'conversation-text'
   | 'agent-thinking'
   | 'agent-started-speaking'
   | 'agent-audio-done'
@@ -231,6 +232,11 @@ export function createDeepgramAdapter(options: DeepgramAdapterOptions): Deepgram
         call.ignoreAudio = true
         output.reset()
         sample(call)
+      })
+      bind('conversation-text', (message) => {
+        if (!call.ready || !message || typeof message !== 'object') return
+        // The finalized user turn precedes its reply audio, even without AgentThinking.
+        if ('role' in message && message.role === 'user') call.ignoreAudio = false
       })
       bind('agent-thinking', () => {
         if (!call.ready) return

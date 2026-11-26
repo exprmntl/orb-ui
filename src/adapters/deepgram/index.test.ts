@@ -124,6 +124,22 @@ describe('Deepgram browser adapter (synthetic protocol/audio fixtures)', () => {
     f.unsubscribe()
   })
 
+  it('plays the reply after a finalized user transcript without an agent-start event', async () => {
+    const f = fixture()
+    await ready(f)
+    f.session.emit('user-started-speaking')
+    f.session.emit('conversation-text', { role: 'assistant', content: 'Interrupted response' })
+    f.session.emit('audio', new ArrayBuffer(64))
+    expect(f.player.queue).not.toHaveBeenCalled()
+    f.session.emit('conversation-text', { role: 'user', content: 'What color is a lemon?' })
+    f.player.remaining = 1
+    f.player.level = 0.5
+    f.session.emit('audio', new ArrayBuffer(64))
+    expect(f.player.queue).toHaveBeenCalledOnce()
+    expect(f.last().state).toBe('speaking')
+    f.unsubscribe()
+  })
+
   it('clears stale playback and errors on reconnect, then requires settings again', async () => {
     const f = fixture()
     await ready(f)

@@ -3,7 +3,7 @@ title: Cartesia Managed Agents React Voice UI
 description: Build a Cartesia Managed Agent voice interface with browser WebSocket sessions, PCM16 audio, captions, client tools, interruption cleanup, and a local simulation.
 ---
 
-> Requires `orb-ui@0.10.0` or later. SDK types, offline fixtures, and browser lifecycle tests have been checked. Live provider credential tests have not been run.
+> Requires `orb-ui@0.10.0` or later. A local browser test sent a spoken question to a Cartesia agent, measured its reply audio, and ended the session.
 
 `createCartesiaAdapter` connects a **Managed Agent conversation** to orb-ui. It opens Cartesia's
 agent WebSocket, waits for `session_ready`, streams mono PCM16 input, plays returned audio,
@@ -155,8 +155,8 @@ blob worklet modules, inject `createCaptureNode(context)` from your existing app
 
 Synthetic tests cover session ordering, audio encoding, playback drain, interruption, recoverable
 and fatal errors, tool limits, transport backpressure, denied permission, cancellation, and
-reconnect. Live provider credential tests have **not been run**. The local simulation validates
-the visual interaction; confirm your agent behavior and real-device audio before production use.
+reconnect. The live test used a short-lived agent token and WebSocket audio. Check microphone
+permission and playback on the browsers and devices you support.
 
 - [Managed Agent WebSocket integration](https://docs.cartesia.ai/line/integrations/websocket-api)
 - [Managed Agent event reference](https://docs.cartesia.ai/api-reference/agents/agent-websocket)

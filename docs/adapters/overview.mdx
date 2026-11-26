@@ -40,8 +40,9 @@ including normalized input and output volume when the provider exposes audio.
 | [Nova 2 Sonic](/adapters/nova-sonic)           | Your Node/Socket.IO/Bedrock application                | Controlled bridge; full-stack recipe supplies transport and media                 |
 
 Retell, Deepgram, Agora, Azure Voice Live, Cartesia, and Nova 2 Sonic require `orb-ui@0.10.0`
-or later. Their local checks cover SDK types and synthetic events. Live calls with these
-integrations still need verification.
+or later. Their local checks cover SDK types and synthetic events. Deepgram and Cartesia have
+also passed authenticated voice calls. Retell, Agora, Azure Voice Live, and Nova 2 Sonic still
+need live verification.
 
 Hume retired its hosted EVI API on November 13, 2026. The bridge remains available for
 existing code and recorded signals. [Archived Hume guide](/adapters/hume)

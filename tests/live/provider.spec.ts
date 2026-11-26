@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { Cartesia } from '@cartesia/cartesia-js'
 import { env, platform } from 'node:process'
 import { expect, test, type Page } from '@playwright/test'
 
@@ -32,7 +34,16 @@ async function installTestMicrophone(page: Page) {
     let destination: MediaStreamAudioDestinationNode | undefined
     navigator.mediaDevices.getUserMedia = async () => {
       context ??= new AudioContext()
-      destination ??= context.createMediaStreamDestination()
+      if (!destination) {
+        destination = context.createMediaStreamDestination()
+        // Keep microphone frames flowing after the question so server-side VAD sees quiet audio.
+        const tone = context.createOscillator()
+        const gain = context.createGain()
+        tone.frequency.value = 200
+        gain.gain.value = 0.0005
+        tone.connect(gain).connect(destination)
+        tone.start()
+      }
       await context.resume()
       return destination.stream.clone()
     }
@@ -130,35 +141,69 @@ for (const call of calls) {
         await page.locator('#' + field).fill('provided-by-local-test')
     }
 
-    const state = page.getByTestId('qa-state')
-    const orb = page.getByTestId('provider-playground-orb')
-    const positiveLevel = /^(?:0\.(?!00)\d{2}|1\.00)$/
-    await orb.click()
-    try {
-      await expect(state).toHaveText('listening', { timeout: 25_000 })
-      for (const frame of page.frames())
-        await frame.evaluate(() => window.dispatchEvent(new Event('orb-qa-speak')))
-      await expect(page.getByTestId('qa-input-volume')).toHaveText(positiveLevel, {
-        timeout: 8_000,
+    await checkVoiceRoundTrip(page)
+  })
+}
+
+async function checkVoiceRoundTrip(page: Page) {
+  const state = page.getByTestId('qa-state')
+  const orb = page.getByTestId('provider-playground-orb')
+  const positiveLevel = /^(?:0\.(?!00)\d{2}|1\.00)$/
+  await orb.click()
+  try {
+    await expect(state).toHaveText('listening', { timeout: 25_000 })
+    for (const frame of page.frames())
+      await frame.evaluate(() => window.dispatchEvent(new Event('orb-qa-speak')))
+    await expect(page.getByTestId('qa-input-volume')).toHaveText(positiveLevel, {
+      timeout: 8_000,
+    })
+    await expect
+      .poll(async () => {
+        const completed = await Promise.all(
+          page
+            .frames()
+            .map((frame) =>
+              frame.evaluate(() => document.documentElement.dataset.orbQaSpoken === 'true'),
+            ),
+        )
+        return completed.some(Boolean)
       })
-      await expect
-        .poll(async () => {
-          const completed = await Promise.all(
-            page
-              .frames()
-              .map((frame) =>
-                frame.evaluate(() => document.documentElement.dataset.orbQaSpoken === 'true'),
-              ),
-          )
-          return completed.some(Boolean)
+      .toBe(true)
+    await expect(state).toHaveText('speaking', { timeout: 25_000 })
+    await expect(page.getByTestId('qa-output-volume')).toHaveText(positiveLevel)
+  } finally {
+    const current = await state.innerText()
+    if (current !== 'idle' && current !== 'error') await orb.click()
+  }
+  await expect(state).toHaveText('idle')
+}
+
+for (const provider of ['deepgram', 'cartesia'] as const) {
+  test(provider, async ({ page, baseURL }) => {
+    const apiKey = setting(provider === 'cartesia' ? 'CARTESIA_API_KEY' : 'DEEPGRAM_API_KEY')
+    const params = new URLSearchParams({ provider })
+    if (provider === 'cartesia') params.set('agent', setting('CARTESIA_AGENT_ID'))
+    await page.context().grantPermissions(['microphone'], { origin: baseURL })
+    await installTestMicrophone(page)
+    await page.route(new URL('/qa-token', baseURL).href, async (route) => {
+      if (provider === 'cartesia') {
+        const client = new Cartesia({ apiKey })
+        const { token } = await client.accessToken.create({
+          expires_in: 60,
+          grants: { agent: true },
         })
-        .toBe(true)
-      await expect(state).toHaveText('speaking', { timeout: 25_000 })
-      await expect(page.getByTestId('qa-output-volume')).toHaveText(positiveLevel)
-    } finally {
-      const current = await state.innerText()
-      if (current !== 'idle' && current !== 'error') await orb.click()
-    }
-    await expect(state).toHaveText('idle')
+        return route.fulfill({ json: { token } })
+      }
+      const response = await fetch('https://api.deepgram.com/v1/auth/grant', {
+        method: 'POST',
+        headers: { Authorization: 'Token ' + apiKey },
+      })
+      if (!response.ok) return route.fulfill({ status: response.status })
+      const { access_token } = await response.json()
+      return route.fulfill({ json: { token: access_token } })
+    })
+    const fixture = fileURLToPath(new URL('./managed.html', import.meta.url))
+    await page.goto('/@fs/' + fixture + '?' + params)
+    await checkVoiceRoundTrip(page)
   })
 }

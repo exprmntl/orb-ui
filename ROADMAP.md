@@ -17,13 +17,13 @@ search, and audio-reactive narration. Canonical pages include full examples and 
 Hosted provider proxies are disabled; live testing belongs in a developer-owned backend or local
 development harness.
 
-The local `qa:live` suite exercises the seven playground integrations using a recorded
-question and real provider audio. Gemini 3.8 Live and Gemini 3.8 Live Extended Thinking have
-both completed that round trip.
+The local `qa:live` suite uses a recorded question and checks for reply audio. ElevenLabs,
+LiveKit, Pipecat, OpenAI Realtime, OpenAI GPT-Live, both Gemini 3.8 Live variants, Deepgram,
+and Cartesia have completed that round trip. The suite also includes a Vapi case.
 
 Hume retired its hosted EVI API on November 13, 2026. Its guide is archived and its bridge
-remains available for existing code. The other six integrations still need credential-based
-live verification and independent voice calibration.
+remains available for existing code. Retell, Agora, Azure Voice Live, and Nova 2 Sonic still
+need live verification. Independent voice calibration is tracked separately.
 [Hume EVI endpoint retirement notice](https://api.hume.ai/v0/evi/configs)
 
 ### Signal-based adapter API — complete
