@@ -1,0 +1,122 @@
+---
+title: Build a Floating ElevenLabs Voice Widget in Next.js
+sidebarTitle: ElevenLabs voice widget
+description: Add a keyboard-accessible floating launcher, an audio-reactive orb, microphone mute, and call cleanup to a Next.js App Router page.
+---
+
+A floating voice widget has two lifecycles. Opening the panel shows the controls. Pressing **Start call** asks for microphone access and connects to ElevenLabs. Closing the panel ends the call, including a connection that was still starting.
+
+Install `orb-ui` and `@elevenlabs/client@1.9.0` in a Next.js App Router project. This example uses a public ElevenLabs agent ID. For a private agent, obtain a fresh conversation token from an authenticated server route for each call. [ElevenLabs session credentials](/adapters/elevenlabs)
+
+## Build the launcher and call panel
+
+Save this as `app/VoiceWidget.tsx`. The native dialog handles Escape, traps keyboard focus while open, and returns focus to the launcher when closed. The panel subscribes to a single adapter. It retains the SDK session to implement microphone mute.
+
+```tsx
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { VoiceConversation } from '@elevenlabs/client'
+import { Orb, type OrbSignal } from 'orb-ui'
+import { createElevenLabsAdapter } from 'orb-ui/adapters'
+
+function CallPanel({ agentId }: { agentId: string }) {
+  const mic = useRef<VoiceConversation | null>(null)
+  const [muted, setMuted] = useState(false)
+  const [signal, setSignal] = useState<OrbSignal>({ state: 'idle' })
+  const [starting, setStarting] = useState(false)
+  const adapter = useMemo(
+    () =>
+      createElevenLabsAdapter(
+        {
+          async startSession(options) {
+            const session = await VoiceConversation.startSession(options)
+            mic.current = session
+            return session
+          },
+        },
+        { agentId, connectionType: 'webrtc' },
+      ),
+    [agentId],
+  )
+
+  useEffect(() => {
+    const unsubscribe = adapter.subscribe(setSignal)
+    return () => {
+      unsubscribe()
+      void adapter.stop()
+    }
+  }, [adapter])
+
+  const connected = signal.state === 'listening' || signal.state === 'speaking'
+  return (
+    <>
+      <Orb signal={signal} theme="circle" size={160} interactive={false} />
+      <p role="status">
+        {signal.state === 'error'
+          ? 'Call failed. Check microphone access and retry.'
+          : signal.state}
+      </p>
+      <button
+        type="button"
+        disabled={starting || connected || signal.state === 'connecting'}
+        onClick={async () => {
+          setMuted(false)
+          setStarting(true)
+          try {
+            await adapter.start()
+          } finally {
+            setStarting(false)
+          }
+        }}
+      >
+        Start call
+      </button>
+      <button
+        type="button"
+        disabled={starting || !connected}
+        aria-pressed={muted}
+        onClick={() => {
+          if (!mic.current) return
+          mic.current.setMicMuted(!muted)
+          setMuted(!muted)
+        }}
+      >
+        Mute microphone
+      </button>
+    </>
+  )
+}
+
+export default function VoiceWidget({ agentId }: { agentId: string }) {
+  const dialog = useRef<HTMLDialogElement>(null)
+  const [open, setOpen] = useState(false)
+  return (
+    <>
+      <button
+        type="button"
+        aria-haspopup="dialog"
+        style={{ position: 'fixed', bottom: 20, right: 20 }}
+        onClick={() => {
+          dialog.current?.showModal()
+          setOpen(true)
+        }}
+      >
+        Talk to us
+      </button>
+      <dialog ref={dialog} aria-label="Voice assistant" onClose={() => setOpen(false)}>
+        {open && <CallPanel key={agentId} agentId={agentId} />}
+        <button type="button" onClick={() => dialog.current?.close()}>
+          Close and end call
+        </button>
+      </dialog>
+    </>
+  )
+}
+```
+
+## Add the widget to one route
+
+Import `VoiceWidget` into the page where visitors need voice help and render `<VoiceWidget agentId="YOUR_PUBLIC_AGENT_ID" />`. Use your own agent's public ID. The client component handles the browser APIs, so the surrounding page can remain a Server Component.
+
+Test with the keyboard first. Open the dialog, start a call, mute while the agent is speaking, and press Escape. The agent audio should remain audible while the mic is muted, and closing should release capture. Reopen and start again. If permissions are denied, allow microphone access in the browser before retrying. [ElevenLabs JavaScript SDK](https://elevenlabs.io/docs/agents-platform/libraries/java-script)

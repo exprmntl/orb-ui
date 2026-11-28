@@ -1,0 +1,132 @@
+---
+title: Build an Audio-Reactive Voice Orb with React Three Fiber
+sidebarTitle: React Three Fiber orb
+description: Animate a Three.js sphere from microphone and assistant volume in React. Try listening and speaking with a slider, then connect the same scene to your voice session.
+---
+
+A voice orb needs two inputs. The conversation state tells you **who has the turn**. The audio level tells you **how much to move**. This example builds a faceted Three.js sphere that turns teal while listening, violet while speaking, and gray when idle. The louder the active speaker gets, the larger the sphere grows.
+
+React Three Fiber renders the scene inside a React component. Orb UI supplies the current state and a normalized `activity` value to your custom renderer. You can test the whole animation with a slider before connecting audio.
+
+## Install the scene dependencies
+
+In a React 19 web app with TypeScript, install the renderer and its type declarations.
+
+```bash
+npm install orb-ui three @react-three/fiber@9
+npm install -D @types/three
+```
+
+For React 18, use `@react-three/fiber@8`. The renderer's major version follows the React version in your app. [React Three Fiber installation guide](https://r3f.docs.pmnd.rs/getting-started/installation)
+
+## Build the orb and try both sides of a conversation
+
+Save this as `VoiceOrbDemo.tsx` and render `<VoiceOrbDemo />` on a page. Select **Listening** and move the microphone slider. Then select **Speaking**. Only the assistant slider should affect the orb during that turn.
+
+```tsx
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { MathUtils, type Mesh } from 'three'
+import { Orb, type OrbState, type OrbThemeRenderer } from 'orb-ui'
+
+function VoiceMesh({ activity, state }: { activity: number; state: OrbState }) {
+  const mesh = useRef<Mesh>(null)
+  const invalidate = useThree((scene) => scene.invalidate)
+  const target = 1 + 0.25 * MathUtils.clamp(activity, 0, 1)
+  const colors = { listening: '#2dd4bf', speaking: '#a78bfa' }
+  const color = state === 'listening' || state === 'speaking' ? colors[state] : '#94a3b8'
+
+  useEffect(() => {
+    invalidate()
+  }, [target, invalidate])
+
+  useFrame((_, delta) => {
+    if (!mesh.current) return
+    const next = MathUtils.damp(mesh.current.scale.x, target, 12, Math.min(delta, 0.1))
+    if (Math.abs(next - target) < 0.001) {
+      mesh.current.scale.setScalar(target)
+      return
+    }
+    mesh.current.scale.setScalar(next)
+    invalidate()
+  })
+
+  return (
+    <mesh ref={mesh}>
+      <icosahedronGeometry args={[1, 2]} />
+      <meshStandardMaterial color={color} flatShading roughness={0.45} />
+    </mesh>
+  )
+}
+
+const renderVoiceScene: OrbThemeRenderer = ({ rootProps, activity, state }) => (
+  <div {...rootProps} aria-hidden="true">
+    <Canvas frameloop="demand" dpr={[1, 1.5]} camera={{ position: [0, 0, 4], fov: 42 }}>
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[3, 4, 4]} intensity={2} />
+      <VoiceMesh activity={activity} state={state} />
+    </Canvas>
+  </div>
+)
+
+export default function VoiceOrbDemo() {
+  const [state, setState] = useState<OrbState>('listening')
+  const [inputVolume, setInputVolume] = useState(0.2)
+  const [outputVolume, setOutputVolume] = useState(0.8)
+
+  return (
+    <section>
+      <Orb
+        signal={{ state, inputVolume, outputVolume }}
+        renderTheme={renderVoiceScene}
+        size={240}
+        interactive={false}
+      />
+      <p role="status">Voice state: {state}</p>
+      <button onClick={() => setState('idle')}>Idle</button>
+      <button onClick={() => setState('listening')}>Listening</button>
+      <button onClick={() => setState('speaking')}>Speaking</button>
+      <label>
+        Microphone level{' '}
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={inputVolume}
+          onChange={(e) => setInputVolume(e.currentTarget.valueAsNumber)}
+        />
+      </label>
+      <label>
+        Assistant level{' '}
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={outputVolume}
+          onChange={(e) => setOutputVolume(e.currentTarget.valueAsNumber)}
+        />
+      </label>
+    </section>
+  )
+}
+```
+
+The mesh requests another frame while its size approaches the target. Once it settles, the canvas sleeps until something changes. This also lets a silent or idle orb hold still. [React Three Fiber render loop](https://r3f.docs.pmnd.rs/advanced/scaling-performance)
+
+## Connect a voice session
+
+If your app already owns the session, replace the slider values with its current signal. While the user is listening to the assistant, the state is `speaking` and `outputVolume` is the level of the audio being played. While the microphone is listening to the user, set `inputVolume` from the microphone meter. Set the state to `thinking` while the agent prepares a reply. The renderer receives zero activity in this state.
+
+If you use a provider adapter, give the same renderer to the adapter-backed orb. Keep your existing Start and Stop controls and visible state label alongside the canvas.
+
+```tsx
+<Orb adapter={adapter} renderTheme={renderVoiceScene} size={240} interactive={false} />
+```
+
+If the orb changes color but stays the same size, watch the active speaker's level during a turn. If it stays at zero, check the meter feeding that direction. If it stays at one, normalize the input before passing it to the renderer. [Volume calibration](/guides/volume-calibration)
+
+To compare this mesh with the built-in cloud and radial artwork, try the [interactive React voice orb example](/examples/voice-orb-ui). To connect a custom WebSocket client, follow the [custom voice integration guide](/adapters/custom).

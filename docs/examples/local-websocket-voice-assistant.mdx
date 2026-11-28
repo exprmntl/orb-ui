@@ -1,0 +1,101 @@
+---
+title: Connect a Local WebSocket Voice Assistant to a React Orb
+sidebarTitle: Local WebSocket assistant
+description: Send voice state and two audio meters over a local WebSocket, map them to OrbSignal, and reset the UI on disconnect or reconnect.
+---
+
+When a desktop assistant already owns the microphone and speaker, the web UI needs a small stream of status messages. OpenToys uses this design for its Mac app and talking toys. The browser can show exactly when the device is listening or replying without opening another microphone. [OpenToys voice component](https://github.com/akdeb/OpenToys/blob/cd0c020f49701fa8d068e3a8456cad95cd95a02b/app/src/components/VoiceOrb.tsx)
+
+## Run a test signal server
+
+Install `ws` with `npm install ws`, save this as `voice-server.mjs`, and run `node voice-server.mjs`. It serves simulated turn data on loopback. Run your React app on `http://localhost:5173` or adjust the allowed origin to match your local UI.
+
+```js
+import { WebSocketServer } from 'ws'
+
+const server = new WebSocketServer({
+  host: '127.0.0.1',
+  port: 8787,
+  verifyClient: ({ origin }) => origin === 'http://localhost:5173',
+})
+const states = ['listening', 'thinking', 'speaking', 'idle']
+server.on('connection', (socket) => {
+  let tick = 0
+  function send() {
+    const state = states[Math.floor(tick / 20) % states.length]
+    const level = (1 + Math.sin(tick * 0.6)) / 2
+    socket.send(
+      JSON.stringify({
+        state,
+        inputVolume: state === 'listening' ? level : 0,
+        outputVolume: state === 'speaking' ? level : 0,
+      }),
+    )
+    tick++
+  }
+  send()
+  const timer = setInterval(send, 100)
+  socket.on('close', () => clearInterval(timer))
+})
+```
+
+## Display the latest complete signal
+
+Install `orb-ui` in the React app. Each message contains a full snapshot, so a new turn replaces both readings. The effect owns one socket. Clicking Reconnect or unmounting removes its handlers before closing it, which prevents an old close event from overwriting a new session.
+
+```tsx
+import { useEffect, useState } from 'react'
+import { Orb, type OrbSignal } from 'orb-ui'
+
+function readSignal(text: string): OrbSignal {
+  const value = JSON.parse(text)
+  const states = ['idle', 'connecting', 'listening', 'thinking', 'speaking', 'error']
+  const validLevel = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 1
+  if (
+    !value ||
+    !states.includes(value.state) ||
+    !validLevel(value.inputVolume) ||
+    !validLevel(value.outputVolume)
+  ) {
+    throw new Error('Invalid voice signal')
+  }
+  return { state: value.state, inputVolume: value.inputVolume, outputVolume: value.outputVolume }
+}
+
+export default function LocalVoiceOrb() {
+  const [attempt, setAttempt] = useState(0)
+  const [signal, setSignal] = useState<OrbSignal>({ state: 'connecting' })
+  useEffect(() => {
+    setSignal({ state: 'connecting' })
+    const socket = new WebSocket('ws://127.0.0.1:8787')
+    socket.onmessage = ({ data }) => {
+      try {
+        setSignal(readSignal(data))
+      } catch {
+        socket.close(1007, 'Invalid signal')
+      }
+    }
+    socket.onclose = () => setSignal({ state: 'error' })
+    return () => {
+      socket.onmessage = null
+      socket.onclose = null
+      socket.close()
+    }
+  }, [attempt])
+  return (
+    <section>
+      <Orb signal={signal} theme="cloud" interactive={false} />
+      <p role="status">{signal.state === 'error' ? 'Assistant disconnected' : signal.state}</p>
+      <button type="button" onClick={() => setAttempt((n) => n + 1)}>
+        Reconnect
+      </button>
+    </section>
+  )
+}
+```
+
+## Replace the simulator with your assistant
+
+Send `listening` and a normalized microphone level during capture. Send `thinking` after the user finishes. Switch to `speaking` when playback starts and meter the output through its final buffer. On interruption, clear the output meter before the next listening update. Emit the current snapshot as soon as a client reconnects.
+
+Stop the server mid-reply. The status should change to disconnected and the old speaking level should disappear. Restart the server and click Reconnect. For a remote assistant, use an authenticated secure WebSocket and restrict its allowed origins to your application. [Custom integration contract](/adapters/custom)
