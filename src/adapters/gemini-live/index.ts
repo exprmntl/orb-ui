@@ -1,3 +1,4 @@
+import { createManagedSessionAdapter } from '../managed-session'
 import type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from '../types'
 import { createVolumeNormalizer } from '../audio-level'
 import type { VolumeCalibrationSource, VolumeSample } from '../audio-level'
@@ -131,7 +132,16 @@ function sampleRateFromMimeType(mimeType: string | undefined) {
  * PCM playback, volume metering, and normalized voice state.
  */
 export function createGeminiLiveAdapter(config: GeminiLiveAdapterConfig): GeminiLiveOrbAdapter {
-  const listeners = new Set<OrbSignalListener>()
+  return createManagedSessionAdapter((lifetime, publish) =>
+    createGeminiSession(config, lifetime, publish),
+  )
+}
+
+function createGeminiSession(
+  config: GeminiLiveAdapterConfig,
+  lifetime: AbortSignal,
+  publish: OrbSignalListener,
+) {
   const scheduledSources = new Set<AudioBufferSourceNode>()
   let signal: OrbSignal = { state: 'idle', inputVolume: 0, outputVolume: 0 }
   let session: GeminiLiveSession | null = null
@@ -162,7 +172,7 @@ export function createGeminiLiveAdapter(config: GeminiLiveAdapterConfig): Gemini
 
   function emit(next: OrbSignal) {
     signal = next
-    listeners.forEach((listener) => listener(next))
+    publish(next)
   }
 
   function emitState(state: OrbState, error?: unknown) {
@@ -327,7 +337,7 @@ export function createGeminiLiveAdapter(config: GeminiLiveAdapterConfig): Gemini
     }
   }
 
-  async function cleanup(emitIdle: boolean) {
+  async function cleanup() {
     stopping = true
     clearSpeechEndTimer()
     if (outputVolumeInterval) clearInterval(outputVolumeInterval)
@@ -350,48 +360,55 @@ export function createGeminiLiveAdapter(config: GeminiLiveAdapterConfig): Gemini
     turnComplete = false
     inputNormalizer.reset()
     outputNormalizer.reset()
-    if (emitIdle) emitState('idle')
     stopping = false
   }
 
   return {
-    subscribe(listener) {
-      listeners.add(listener)
-      listener(signal)
-      return () => listeners.delete(listener)
-    },
-
     async start() {
-      if (session) return
       emitState('connecting')
+      if (lifetime.aborted) return
       stopping = false
 
       try {
         const getUserMedia =
           config.getUserMedia ?? ((constraints) => navigator.mediaDevices.getUserMedia(constraints))
         const createAudioContext = config.createAudioContext ?? (() => new window.AudioContext())
-        stream = await getUserMedia(config.mediaStreamConstraints ?? { audio: true })
+        const acquired = await getUserMedia(config.mediaStreamConstraints ?? { audio: true })
+        if (lifetime.aborted) {
+          acquired.getTracks().forEach((track) => track.stop())
+          return
+        }
+        stream = acquired
         audioContext = createAudioContext()
         if (audioContext.state === 'suspended') await audioContext.resume()
+        if (lifetime.aborted) return
         outputAnalyser = audioContext.createAnalyser()
         outputAnalyser.fftSize = 512
         outputAnalyser.smoothingTimeConstant = 0.25
         outputAnalyser.connect(audioContext.destination)
         startOutputMeter()
 
-        session = await config.connect({
+        const connected = await config.connect({
           onopen: () => emitState('listening'),
-          onmessage: handleMessage,
+          onmessage: (message) => {
+            if (!lifetime.aborted) handleMessage(message)
+          },
           onerror: (error) => emitState('error', error),
           onclose: () => {
             if (!stopping) emitState('idle')
           },
         })
+        if (lifetime.aborted) {
+          connected.close()
+          return
+        }
+        session = connected
         startInputCapture()
         emitState('listening')
       } catch (error) {
+        if (lifetime.aborted) return
         session?.close()
-        await cleanup(false)
+        await cleanup()
         emitState('error', error)
         throw error
       }
@@ -408,7 +425,7 @@ export function createGeminiLiveAdapter(config: GeminiLiveAdapterConfig): Gemini
         // The session may already be closed.
       }
       session?.close()
-      await cleanup(true)
+      await cleanup()
     },
   }
 }

@@ -74,6 +74,9 @@ key in browser code or a `VITE_*`/`NEXT_PUBLIC_*` variable.
 
 ## State and volume mapping
 
+Calling `adapter.stop()` during authorization, microphone permission, or negotiation returns the
+orb to idle. You can start again immediately. A late result from the previous call is discarded.
+
 - WebRTC negotiation -> `connecting`
 - `input_audio_buffer.speech_started` -> `listening`
 - `input_audio_buffer.speech_stopped` and `response.created` -> `thinking` when no output is playing

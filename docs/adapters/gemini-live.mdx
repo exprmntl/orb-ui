@@ -105,6 +105,9 @@ declared by each response chunk. An interruption stops all queued audio immediat
 
 ## State and volume mapping
 
+Calling `adapter.stop()` during microphone permission or SDK connection returns the orb to idle.
+You can start again immediately. The adapter releases any microphone or session that arrives late.
+
 - token/session connection -> `connecting`
 - active microphone/user speech -> `listening`
 - end of detected user speech or model text work -> `thinking`

@@ -1,3 +1,4 @@
+import { createManagedSessionAdapter } from '../managed-session'
 import type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from '../types'
 import { createVolumeNormalizer } from '../audio-level'
 import type { VolumeCalibrationSource, VolumeSample } from '../audio-level'
@@ -104,7 +105,16 @@ function resolveClientSecret(secret: string | OpenAIRealtimeClientSecret) {
 export function createOpenAIRealtimeAdapter(
   config: OpenAIRealtimeAdapterConfig,
 ): OpenAIRealtimeOrbAdapter {
-  const listeners = new Set<OrbSignalListener>()
+  return createManagedSessionAdapter((lifetime, publish) =>
+    createRealtimeSession(config, lifetime, publish),
+  )
+}
+
+function createRealtimeSession(
+  config: OpenAIRealtimeAdapterConfig,
+  lifetime: AbortSignal,
+  publish: OrbSignalListener,
+) {
   let signal: OrbSignal = { state: 'idle', inputVolume: 0, outputVolume: 0 }
   let peerConnection: RTCPeerConnection | null = null
   let dataChannel: RTCDataChannel | null = null
@@ -130,7 +140,7 @@ export function createOpenAIRealtimeAdapter(
 
   function emit(next: OrbSignal) {
     signal = next
-    listeners.forEach((listener) => listener(next))
+    publish(next)
   }
 
   function emitState(state: OrbState, error?: unknown) {
@@ -222,7 +232,7 @@ export function createOpenAIRealtimeAdapter(
     }
   }
 
-  async function cleanup(emitIdle: boolean) {
+  async function cleanup() {
     stopping = true
     dataChannel?.close()
     dataChannel = null
@@ -242,20 +252,13 @@ export function createOpenAIRealtimeAdapter(
     userSpeaking = false
     inputNormalizer.reset()
     outputNormalizer.reset()
-    if (emitIdle) emitState('idle')
     stopping = false
   }
 
   return {
-    subscribe(listener) {
-      listeners.add(listener)
-      listener(signal)
-      return () => listeners.delete(listener)
-    },
-
     async start() {
-      if (peerConnection) return
       emitState('connecting')
+      if (lifetime.aborted) return
       stopping = false
 
       try {
@@ -267,7 +270,13 @@ export function createOpenAIRealtimeAdapter(
         const createAudioContext = config.createAudioContext ?? defaultCreateAudioContext
         const clientSecret = resolveClientSecret(await config.getClientSecret())
 
-        localStream = await getUserMedia(config.mediaStreamConstraints ?? { audio: true })
+        if (lifetime.aborted) return
+        const stream = await getUserMedia(config.mediaStreamConstraints ?? { audio: true })
+        if (lifetime.aborted) {
+          stream.getTracks().forEach((track) => track.stop())
+          return
+        }
+        localStream = stream
         inputMeter = createStreamVolumeMeter(localStream, createAudioContext, emitInputVolume)
         const pc = createPeerConnection()
         peerConnection = pc
@@ -277,6 +286,7 @@ export function createOpenAIRealtimeAdapter(
         remoteAudio.autoplay = true
 
         pc.ontrack = (event) => {
+          if (lifetime.aborted) return
           const stream = event.streams[0] ?? new MediaStream([event.track])
           if (remoteAudio) remoteAudio.srcObject = stream
           void remoteAudio?.play().catch(() => undefined)
@@ -284,7 +294,7 @@ export function createOpenAIRealtimeAdapter(
           outputMeter = createStreamVolumeMeter(stream, createAudioContext, emitOutputVolume)
         }
         pc.onconnectionstatechange = () => {
-          if (stopping) return
+          if (lifetime.aborted || stopping) return
           if (pc.connectionState === 'failed') {
             emitState('error', new Error('[orb-ui/openai-realtime] WebRTC connection failed.'))
           } else if (pc.connectionState === 'disconnected' || pc.connectionState === 'closed') {
@@ -308,9 +318,12 @@ export function createOpenAIRealtimeAdapter(
         }
 
         const offer = await pc.createOffer()
+        if (lifetime.aborted) return
         await pc.setLocalDescription(offer)
+        if (lifetime.aborted) return
         const response = await fetchImplementation(config.callsUrl ?? DEFAULT_CALLS_URL, {
           method: 'POST',
+          signal: lifetime,
           body: offer.sdp,
           headers: {
             Authorization: `Bearer ${clientSecret}`,
@@ -323,16 +336,18 @@ export function createOpenAIRealtimeAdapter(
             `[orb-ui/openai-realtime] Session negotiation failed (${response.status}): ${detail}`,
           )
         }
-        await pc.setRemoteDescription({ type: 'answer', sdp: await response.text() })
+        const sdp = await response.text()
+        if (!lifetime.aborted) await pc.setRemoteDescription({ type: 'answer', sdp })
       } catch (error) {
-        await cleanup(false)
+        if (lifetime.aborted) return
+        await cleanup()
         emitState('error', error)
         throw error
       }
     },
 
     async stop() {
-      await cleanup(true)
+      await cleanup()
     },
   }
 }

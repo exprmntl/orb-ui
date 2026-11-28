@@ -202,27 +202,53 @@ describe('Vapi adapter signals', () => {
     expect(signals).toHaveLength(signalCount)
   })
 
-  it('keeps volume smoothing independent for each subscriber', () => {
-    const animationFrame = installAnimationFrameStub()
+  it('replays shared Vapi state to late or remounted views and samples once per frame', () => {
+    const frame = installAnimationFrameStub()
     const client = new FakeVapiClient()
-    const adapter = createVapiAdapter(client as unknown as VapiClientLike)
-    const firstSignals: OrbSignal[] = []
-    const secondSignals: OrbSignal[] = []
-
-    const unsubscribeFirst = adapter.subscribe((signal) => firstSignals.push(signal))
-    const unsubscribeSecond = adapter.subscribe((signal) => secondSignals.push(signal))
-
+    const on = vi.spyOn(client, 'on')
+    const sample = vi.fn()
+    const adapter = createVapiAdapter(client as unknown as VapiClientLike, {
+      onOutputVolumeSample: sample,
+    })
+    const first: OrbSignal[] = [],
+      second: OrbSignal[] = []
+    const detachFirst = adapter.subscribe((s) => first.push(s))
     client.emit('call-start')
     client.emit('speech-start')
     client.emit('volume-level', 1)
-    animationFrame.flush()
+    frame.flush()
+    const detachSecond = adapter.subscribe((s) => second.push(s))
+    expect(second).toEqual([lastSignal(first)])
+    expect(lastSignal(second).state).toBe('speaking')
+    expect(on.mock.calls.filter(([event]) => event === 'call-start')).toHaveLength(1)
+    frame.flush()
+    expect(sample).toHaveBeenCalledTimes(2)
+    detachFirst()
+    frame.flush()
+    expect(sample).toHaveBeenCalledTimes(3)
+    detachSecond()
+    frame.flush()
+    expect(sample).toHaveBeenCalledTimes(3)
+    const remounted = vi.fn()
+    const detach = adapter.subscribe(remounted)
+    expect(remounted).toHaveBeenCalledWith(expect.objectContaining({ state: 'speaking' }))
+    detach()
+    client.emit('call-end')
+    expect(client.start).toBe(client.startMock)
+    expect(client.stop).not.toHaveBeenCalled()
+  })
 
-    expect(lastSignal(firstSignals).outputVolume).toBeCloseTo(
-      lastSignal(secondSignals).outputVolume ?? 0,
-    )
-
-    unsubscribeFirst()
-    unsubscribeSecond()
+  it('replays an adapter-started call to its first subscriber', async () => {
+    const client = new FakeVapiClient()
+    const adapter = createVapiAdapter(client as unknown as VapiClientLike)
+    await adapter.start?.()
+    client.emit('call-start')
+    const listener = vi.fn()
+    const unsubscribe = adapter.subscribe(listener)
+    expect(listener).toHaveBeenCalledWith({ state: 'listening', inputVolume: 0, outputVolume: 0 })
+    unsubscribe()
+    client.emit('call-end')
+    expect(client.start).toBe(client.startMock)
   })
 
   it('keeps Vapi connecting signals after another subscriber unsubscribes', async () => {
@@ -237,7 +263,7 @@ describe('Vapi adapter signals', () => {
     unsubscribeFirst()
     await adapter.start?.()
 
-    expect(firstSignals).toHaveLength(0)
+    expect(firstSignals.map((s) => s.state)).toEqual(['idle'])
     expect(lastSignal(secondSignals)).toMatchObject({ state: 'connecting' })
     expect(client.startMock).toHaveBeenCalledOnce()
 

@@ -48,6 +48,64 @@ afterEach(() => {
 })
 
 describe('createOpenAIRealtimeAdapter', () => {
+  it('shares a pending start and ignores authorization delivered after stop', async () => {
+    let grant!: (secret: string) => void
+    const secret = new Promise<string>((resolve) => {
+      grant = resolve
+    })
+    const getClientSecret = vi.fn(() => secret)
+    const getUserMedia = vi.fn()
+    const adapter = createOpenAIRealtimeAdapter({ getClientSecret, getUserMedia })
+    const signals: OrbSignal[] = []
+    adapter.subscribe((s) => signals.push(s))
+    const ready = adapter.start()
+    expect(adapter.start()).toBe(ready)
+    await adapter.stop()
+    await ready
+    grant('late')
+    await Promise.resolve()
+    expect(getClientSecret).toHaveBeenCalledOnce()
+    expect(getUserMedia).not.toHaveBeenCalled()
+    expect(signals.map((s) => s.state)).toEqual(['idle', 'connecting', 'idle'])
+  })
+
+  it('releases a late microphone without disturbing a restarted call', async () => {
+    let release!: (stream: MediaStream) => void
+    const late = new Promise<MediaStream>((resolve) => {
+      release = resolve
+    })
+    const staleTrack = { stop: vi.fn() },
+      currentTrack = { stop: vi.fn() }
+    const media = (track: typeof staleTrack) =>
+      ({ getTracks: () => [track], getAudioTracks: () => [track] }) as unknown as MediaStream
+    const getUserMedia = vi.fn().mockReturnValueOnce(late).mockResolvedValue(media(currentTrack))
+    const pc = new FakePeerConnection()
+    const adapter = createOpenAIRealtimeAdapter({
+      getClientSecret: async () => 'secret',
+      getUserMedia,
+      createAudioContext: () => undefined,
+      createPeerConnection: () => pc as unknown as RTCPeerConnection,
+      createAudioElement: () => ({ pause() {}, remove() {} }) as unknown as HTMLAudioElement,
+      fetch: async () => new Response('answer'),
+    })
+    const signals: OrbSignal[] = []
+    adapter.subscribe((s) => signals.push(s))
+    const first = adapter.start()
+    await Promise.resolve()
+    await adapter.stop()
+    await first
+    await adapter.start()
+    pc.dataChannel.open()
+    release(media(staleTrack))
+    await Promise.resolve()
+    expect(staleTrack.stop).toHaveBeenCalledOnce()
+    expect(currentTrack.stop).not.toHaveBeenCalled()
+    expect(signals.at(-1)?.state).toBe('listening')
+    await adapter.stop()
+    pc.dataChannel.open()
+    expect(signals.at(-1)?.state).toBe('idle')
+  })
+
   it('negotiates GA WebRTC and maps Realtime events to orb signals', async () => {
     const track = { stop: vi.fn(), kind: 'audio' } as unknown as MediaStreamTrack
     const stream = {

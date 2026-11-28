@@ -83,6 +83,65 @@ afterEach(() => {
 })
 
 describe('createGeminiLiveAdapter', () => {
+  it('releases a microphone permission result delivered after stop', async () => {
+    let grant!: (stream: MediaStream) => void
+    const stream = new Promise<MediaStream>((resolve) => {
+      grant = resolve
+    })
+    const getUserMedia = vi.fn(() => stream)
+    const connect = vi.fn()
+    const createAudioContext = vi.fn()
+    const adapter = createGeminiLiveAdapter({ getUserMedia, connect, createAudioContext })
+    const states: string[] = []
+    adapter.subscribe((s) => states.push(s.state))
+    const ready = adapter.start()
+    expect(adapter.start()).toBe(ready)
+    await adapter.stop()
+    await ready
+    const track = { stop: vi.fn() }
+    grant({ getTracks: () => [track] } as unknown as MediaStream)
+    await Promise.resolve()
+    expect(getUserMedia).toHaveBeenCalledOnce()
+    expect(track.stop).toHaveBeenCalledOnce()
+    expect(connect).not.toHaveBeenCalled()
+    expect(createAudioContext).not.toHaveBeenCalled()
+    expect(states).toEqual(['idle', 'connecting', 'idle'])
+  })
+
+  it('closes an SDK session returned after a restart and ignores its late events', async () => {
+    let finish!: (s: GeminiLiveSession) => void
+    const pending = new Promise<GeminiLiveSession>((resolve) => {
+      finish = resolve
+    })
+    const oldSession = { sendRealtimeInput: vi.fn(), close: vi.fn() }
+    const currentSession = { sendRealtimeInput: vi.fn(), close: vi.fn() }
+    const connect = vi
+      .fn<(callbacks: GeminiLiveCallbacks) => Promise<GeminiLiveSession>>()
+      .mockReturnValueOnce(pending)
+      .mockResolvedValueOnce(currentSession)
+    const adapter = createGeminiLiveAdapter({
+      getUserMedia: async () => ({ getTracks: () => [] }) as unknown as MediaStream,
+      createAudioContext: () => new FakeAudioContext() as unknown as AudioContext,
+      connect,
+    })
+    const signals: OrbSignal[] = []
+    adapter.subscribe((s) => signals.push(s))
+    const first = adapter.start()
+    await Promise.resolve()
+    expect(connect).toHaveBeenCalledOnce()
+    await adapter.stop()
+    await first
+    await adapter.start()
+    finish(oldSession)
+    await Promise.resolve()
+    connect.mock.calls[0][0].onclose()
+    expect(oldSession.close).toHaveBeenCalledOnce()
+    expect(currentSession.close).not.toHaveBeenCalled()
+    expect(signals.at(-1)?.state).toBe('listening')
+    await adapter.stop()
+    expect(currentSession.close).toHaveBeenCalledOnce()
+  })
+
   it('streams microphone PCM and maps Live session audio to speaking signals', async () => {
     vi.useFakeTimers()
     const track = { stop: vi.fn() } as unknown as MediaStreamTrack

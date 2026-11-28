@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import type { OrbProps, OrbSignal, OrbThemeRendererControlProps } from './Orb.types'
 import { useOrbThemeDefaults } from './OrbThemeProvider'
-import { deriveOrbState, selectOrbVolume } from './signals'
+import { boundedVolume, deriveOrbState, selectOrbVolume } from './signals'
 import { DebugTheme } from '../../themes/debug'
 import { CircleTheme } from '../../themes/circle'
 import { BarsTheme } from '../../themes/bars'
@@ -68,13 +68,14 @@ export function Orb(props: OrbProps) {
 
   const activeSignal = signalProp ?? adapterSignal
   const state = deriveOrbState(stateProp, signalProp, adapterSignal)
-  const activity = selectOrbVolume(state, activeSignal)
-  const inputVolume = activeSignal.inputVolume ?? 0
-  const outputVolume = activeSignal.outputVolume ?? 0
+  const inputVolume = boundedVolume(activeSignal.inputVolume)
+  const outputVolume = boundedVolume(activeSignal.outputVolume)
   const rendererSignal = useMemo<OrbSignal>(
     () => ({ ...activeSignal, state, inputVolume, outputVolume }),
     [activeSignal, inputVolume, outputVolume, state],
   )
+
+  const activity = selectOrbVolume(state, rendererSignal)
 
   const themeKey = JSON.stringify(theme)
   const baseTheme = useMemo(

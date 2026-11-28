@@ -38,9 +38,10 @@ active.
 
 ## Session ownership
 
-The adapter can start and stop the configured assistant, and it also observes calls started
-elsewhere through the same Vapi client. Activating an interactive orb calls `vapi.start()` with the
-configured `assistantId`; activating it again calls `vapi.stop()`.
+Start through `adapter.start()` if the first orb may mount after the call begins. If your app calls
+`vapi.start()` directly, mount an orb or subscribe to the adapter first so it receives the call
+events. Activating an interactive orb starts the configured `assistantId`. Activating it again
+calls `vapi.stop()`.
 
 If the product already has labeled call controls, render a passive orb instead:
 
@@ -69,8 +70,9 @@ Vapi assistant audio levels are emitted as `outputVolume` while the assistant is
 Microphone `inputVolume` comes from the existing local audio track exposed by the SDK's public
 `getDailyCallObject()` method. The adapter does not request a second microphone stream or stop
 SDK-owned tracks. It follows track replacement and mute, and releases its meter when the call
-ends, errors, or the subscriber disconnects. Clients without this optional method retain assistant
-output metering and report zero input.
+ends, errors, or the last subscriber disconnects. Orbs using the same adapter share one set of
+meters. A newly mounted orb receives the current call state and levels immediately. Unmounting
+the visuals leaves the call running. Clients without this optional method report zero input.
 
 The core mapping is:
 

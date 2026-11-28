@@ -238,6 +238,28 @@ describe('Orb accessibility', () => {
     expect(html).toContain('orb-ui--custom')
   })
 
+  it.each([
+    [NaN, Infinity, 0, 0],
+    [-Infinity, undefined, 0, 0],
+    [-0.4, 1.7, 0, 1],
+    [0.3, 0.7, 0.3, 0.7],
+  ])('bounds both directions before rendering', (inputVolume, outputVolume, input, output) => {
+    const signal: OrbSignal = { state: 'speaking', inputVolume, outputVolume }
+    const renderTheme = vi.fn(() => null)
+    renderToStaticMarkup(<Orb signal={signal} renderTheme={renderTheme} />)
+    expect(renderTheme).toHaveBeenCalledWith(
+      expect.objectContaining({
+        inputVolume: input,
+        outputVolume: output,
+        activity: output,
+        signal: { state: 'speaking', inputVolume: input, outputVolume: output },
+      }),
+    )
+    expect(renderToStaticMarkup(<Orb signal={signal} state="listening" theme="debug" />)).toContain(
+      input.toFixed(2),
+    )
+  })
+
   it('selects the volume channel for an overridden controlled state', () => {
     const html = renderToStaticMarkup(
       <Orb
