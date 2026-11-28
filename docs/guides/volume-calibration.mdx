@@ -132,6 +132,10 @@ frequency bins. LiveKit client 2.20.0 computes a different frequency-bin measure
 analyser settings. Pipecat's browser track meters, OpenAI Realtime, and Gemini Live use waveform
 RMS. A raw value of `0.2` therefore does not represent the same audio level in every adapter.
 
+OpenAI Realtime, GPT-Live, and Gemini Live share a playback profile. The same waveform produces
+the same normalized envelope when sampled at the same times. Different voices and recordings
+can still produce different levels.
+
 For repeatable microphone tests, feed the same recorded speech at quiet, normal, and louder gains
 through the browser's microphone capture path, with silence between passages. Keep the SDK's
 normal echo cancellation, noise suppression, and automatic gain control settings, and measure the

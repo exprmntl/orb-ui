@@ -1,3 +1,4 @@
+import { PCM_VOLUME_CALIBRATION } from '../volume-presets'
 import type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from '../types'
 import { createVolumeNormalizer, type VolumeCalibrationSource } from '../audio-level'
 import {
@@ -75,11 +76,6 @@ interface ActiveSession<Session> {
   pendingAudio: number
 }
 
-const PCM_CALIBRATION = {
-  amplitude: { silenceFloor: 0.003, speechReference: 0.1, speechPeak: 0.3 },
-  envelope: { riseTimeMs: 100, fallTimeMs: 400 },
-}
-
 /** SDK/session + mono PCM16 browser audio. Azure bills the application's own resource. */
 export function createAzureVoiceLiveAdapter<Session extends AzureVoiceLiveSession>(
   config: AzureVoiceLiveAdapterConfig<Session>,
@@ -89,8 +85,8 @@ export function createAzureVoiceLiveAdapter<Session extends AzureVoiceLiveSessio
   let active: ActiveSession<Session> | undefined
   let starting: Promise<void> | undefined
   let stopping: Promise<void> | undefined
-  const input = createVolumeNormalizer(PCM_CALIBRATION, config.inputVolumeCalibration)
-  const output = createVolumeNormalizer(PCM_CALIBRATION, config.outputVolumeCalibration)
+  const input = createVolumeNormalizer(PCM_VOLUME_CALIBRATION, config.inputVolumeCalibration)
+  const output = createVolumeNormalizer(PCM_VOLUME_CALIBRATION, config.outputVolumeCalibration)
 
   function emit(next: OrbSignal) {
     signal = next

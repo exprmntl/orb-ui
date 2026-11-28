@@ -21,6 +21,9 @@ function calibration(
   }
 }
 
+// Shared by adapters that meter unscaled waveform RMS at browser playback.
+export const PCM_VOLUME_CALIBRATION = calibration(0.003, 0.1, 0.3)
+
 /**
  * Shipped provider baselines. The playground calibration runner generates
  * replacements from guided raw-level captures without requiring manual sliders.
@@ -44,10 +47,10 @@ export const PROVIDER_VOLUME_CALIBRATIONS = {
   },
   openai: {
     input: calibration(0, 0.105_112, 0.25),
-    output: calibration(0.003, 0.07, 0.2),
+    output: PCM_VOLUME_CALIBRATION,
   },
   gemini: {
     input: calibration(0, 0.105_112, 0.25),
-    output: calibration(0.003, 0.17, 0.38),
+    output: PCM_VOLUME_CALIBRATION,
   },
 } as const satisfies Record<string, DirectionalVolumeCalibration>

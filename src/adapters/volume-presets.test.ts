@@ -1,8 +1,54 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { createVolumeNormalizer, mapVolumeAmplitude } from './audio-level'
 import { PROVIDER_VOLUME_CALIBRATIONS } from './volume-presets'
 
+// Both committed fixtures contain mono, 16-bit little-endian PCM. Skip WAV metadata.
+function waveformRms(fixture: string) {
+  const wav = readFileSync(new URL(fixture, import.meta.url))
+  const format = wav.indexOf('fmt ') + 8
+  const data = wav.indexOf('data') + 8
+  expect(wav.readUInt16LE(format)).toBe(1)
+  expect(wav.readUInt16LE(format + 2)).toBe(1)
+  expect(wav.readUInt16LE(format + 14)).toBe(16)
+  const block = Math.round(wav.readUInt32LE(format + 4) * 0.033)
+  const samples = wav.readUInt32LE(data - 4) / 2
+  const rms: number[] = []
+  for (let start = 0; start < samples; start += block) {
+    const end = Math.min(start + block, samples)
+    let squares = 0
+    for (let i = start; i < end; i++) squares += (wav.readInt16LE(data + 2 * i) / 32768) ** 2
+    rms.push(Math.sqrt(squares / (end - start)))
+  }
+  return rms
+}
+
 describe('provider volume calibrations', () => {
+  it.each(['../../tests/live/question.wav', '../../demo/public/fixtures/narration.wav'])(
+    'keeps the OpenAI and Gemini playback envelopes aligned on %s',
+    (fixture) => {
+      const waveform = waveformRms(fixture)
+      for (const [gain, lower, upper] of [
+        [0.45, 0.25, 0.45],
+        [1, 0.45, 0.65],
+        [1.4, 0.65, 0.85],
+      ]) {
+        const traces = [
+          PROVIDER_VOLUME_CALIBRATIONS.openai,
+          PROVIDER_VOLUME_CALIBRATIONS.gemini,
+        ].map((profile) => {
+          const normalizer = createVolumeNormalizer(profile.output)
+          return waveform.map((rms, i) => normalizer.sample(rms * gain, i * 33).normalized)
+        })
+        expect(traces[0]).toEqual(traces[1])
+        const voiced = traces[0].filter((_, i) => waveform[i] >= 0.01).sort((a, b) => a - b)
+        const median = voiced[Math.floor((voiced.length - 1) / 2)]
+        expect(median).toBeGreaterThan(lower)
+        expect(median).toBeLessThan(upper)
+      }
+    },
+  )
+
   it.each([
     ['input', 0.35],
     ['output', 0.39],

@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url'
 import { Cartesia } from '@cartesia/cartesia-js'
 import { env, platform } from 'node:process'
 import { expect, test, type Page } from '@playwright/test'
+import { installPlaybackReference } from './playback-reference'
+import { installSpeechReference, readMeasurement, startMeasuring } from './volume-measurement'
 
 // Read only explicitly named Orb UI test credentials. Print field names on failure.
 function setting(name: string) {
@@ -25,40 +27,57 @@ function setting(name: string) {
   throw new Error('Missing QA setting: ' + name)
 }
 
+const measureVolume = env.ORB_QA_MEASURE_VOLUME === '1'
+const micGain = Number(env.ORB_QA_MIC_GAIN ?? 1)
+if (!(micGain > 0 && micGain <= 1.45))
+  throw new Error(
+    'Choose a microphone gain above 0 and at most 1.45 to avoid clipping the fixture.',
+  )
+
 const question = readFileSync(new URL('./question.wav', import.meta.url)).toString('base64')
 
 // Each SDK receives a disposable microphone track carrying the same synthesized question.
 async function installTestMicrophone(page: Page) {
-  await page.addInitScript((encoded: string) => {
-    let context: AudioContext | undefined
-    let destination: MediaStreamAudioDestinationNode | undefined
-    navigator.mediaDevices.getUserMedia = async () => {
-      context ??= new AudioContext()
-      if (!destination) {
-        destination = context.createMediaStreamDestination()
-        // Keep microphone frames flowing after the question so server-side VAD sees quiet audio.
-        const tone = context.createOscillator()
+  if (measureVolume) {
+    await page.addInitScript(installPlaybackReference)
+    await page.addInitScript(installSpeechReference)
+  }
+  await page.addInitScript(
+    ({ encoded, micGain }) => {
+      let context: AudioContext | undefined
+      let destination: MediaStreamAudioDestinationNode | undefined
+      navigator.mediaDevices.getUserMedia = async () => {
+        context ??= new AudioContext()
+        if (!destination) {
+          destination = context.createMediaStreamDestination()
+          // Keep microphone frames flowing after the question so server-side VAD sees quiet audio.
+          const tone = context.createOscillator()
+          const gain = context.createGain()
+          tone.frequency.value = 200
+          gain.gain.value = 0.0005
+          tone.connect(gain).connect(destination)
+          tone.start()
+        }
+        await context.resume()
+        return destination.stream.clone()
+      }
+      window.addEventListener('orb-qa-speak', async () => {
+        if (!context || !destination) return
+        const bytes = Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0))
+        const source = context.createBufferSource()
+        source.buffer = await context.decodeAudioData(bytes.buffer)
         const gain = context.createGain()
-        tone.frequency.value = 200
-        gain.gain.value = 0.0005
-        tone.connect(gain).connect(destination)
-        tone.start()
-      }
-      await context.resume()
-      return destination.stream.clone()
-    }
-    window.addEventListener('orb-qa-speak', async () => {
-      if (!context || !destination) return
-      const bytes = Uint8Array.from(atob(encoded), (c) => c.charCodeAt(0))
-      const source = context.createBufferSource()
-      source.buffer = await context.decodeAudioData(bytes.buffer)
-      source.connect(destination)
-      source.onended = () => {
-        document.documentElement.dataset.orbQaSpoken = 'true'
-      }
-      source.start()
-    })
-  }, question)
+        gain.gain.value = micGain
+        source.connect(gain).connect(destination)
+        source.onended = () => {
+          document.documentElement.dataset.orbQaSpoken = 'true'
+        }
+        window.orbQaMarkSpeech?.(source.buffer)
+        source.start()
+      })
+    },
+    { encoded: question, micGain },
+  )
 }
 
 type Call = {
@@ -152,6 +171,7 @@ async function checkVoiceRoundTrip(page: Page) {
   await orb.click()
   try {
     await expect(state).toHaveText('listening', { timeout: 25_000 })
+    if (measureVolume) await startMeasuring(page)
     for (const frame of page.frames())
       await frame.evaluate(() => window.dispatchEvent(new Event('orb-qa-speak')))
     await expect(page.getByTestId('qa-input-volume')).toHaveText(positiveLevel, {
@@ -171,6 +191,13 @@ async function checkVoiceRoundTrip(page: Page) {
       .toBe(true)
     await expect(state).toHaveText('speaking', { timeout: 25_000 })
     await expect(page.getByTestId('qa-output-volume')).toHaveText(positiveLevel)
+    if (measureVolume) {
+      const metrics = await readMeasurement(page)
+      console.log(
+        'ORB_QA_VOLUME',
+        JSON.stringify({ provider: test.info().title, micGain, ...metrics }),
+      )
+    }
   } finally {
     const current = await state.innerText()
     if (current !== 'idle' && current !== 'error') await orb.click()

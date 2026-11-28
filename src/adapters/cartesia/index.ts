@@ -1,3 +1,4 @@
+import { PCM_VOLUME_CALIBRATION } from '../volume-presets'
 import type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from '../types'
 import { createVolumeNormalizer, type VolumeCalibrationSource } from '../audio-level'
 import {
@@ -67,11 +68,6 @@ interface Session {
   readyReject?: (error: unknown) => void
 }
 
-const PCM_CALIBRATION = {
-  amplitude: { silenceFloor: 0.003, speechReference: 0.1, speechPeak: 0.3 },
-  envelope: { riseTimeMs: 100, fallTimeMs: 400 },
-}
-
 /** Managed Agents voice conversation over a native browser socket, with local PCM audio. */
 export function createCartesiaAdapter(config: CartesiaAdapterConfig): CartesiaOrbAdapter {
   if (!config.agentId.trim()) throw new Error('A Cartesia Managed Agent ID is required.')
@@ -86,8 +82,8 @@ export function createCartesiaAdapter(config: CartesiaAdapterConfig): CartesiaOr
   let starting: Promise<void> | undefined
   let stopping: Promise<void> | undefined
   let callId: string | undefined
-  const input = createVolumeNormalizer(PCM_CALIBRATION, config.inputVolumeCalibration)
-  const output = createVolumeNormalizer(PCM_CALIBRATION, config.outputVolumeCalibration)
+  const input = createVolumeNormalizer(PCM_VOLUME_CALIBRATION, config.inputVolumeCalibration)
+  const output = createVolumeNormalizer(PCM_VOLUME_CALIBRATION, config.outputVolumeCalibration)
 
   function emit(next: OrbSignal) {
     signal = next

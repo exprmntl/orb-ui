@@ -105,6 +105,21 @@ input and reply audio levels, and ends the session. The Gemini selection calls b
 Live variants. Each run uses a fresh Chrome profile with no microphone hardware, recordings,
 or saved browser credentials. The live suite runs separately from `pnpm check`.
 
+To compare providers, run the same question at three microphone gains. Select the providers
+you have configured. Each selected case opens one billed session per gain.
+
+```bash
+for gain in 0.45 1 1.4; do
+  ORB_QA_MEASURE_VOLUME=1 ORB_QA_MIC_GAIN="$gain" pnpm qa:live -g 'openai-realtime|gemini-3.8-live$'
+done
+```
+
+Each `ORB_QA_VOLUME` line contains the quiet input's 90th percentile and the median and 90th
+percentile during voiced parts of the recording. Reply text and voices vary by call.
+`replyBias` compares the displayed output level with a fixed reference derived independently
+from that call's browser playback. Positive values mean the orb reads higher. A null means
+fewer than ten audible samples could be matched. The test retains numeric levels only.
+
 Supply settings through the test process environment or macOS Keychain. On a Mac, save each
 value once under service `orb-ui-qa`, with its setting name as the account. For example,
 `security add-generic-password -U -s orb-ui-qa -a GEMINI_API_KEY -w` prompts for the value.
