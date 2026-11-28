@@ -69,8 +69,9 @@ Vapi assistant audio levels are emitted as `outputVolume` while the assistant is
 Microphone `inputVolume` comes from the existing local audio track exposed by the SDK's public
 `getDailyCallObject()` method. The adapter does not request a second microphone stream or stop
 SDK-owned tracks. It follows track replacement and mute, and releases its meter when the call
-ends, errors, or the subscriber disconnects. Clients without this optional method retain assistant
-output metering and report zero input.
+ends, errors, or the last subscriber disconnects. Orbs using the same adapter share one set of
+meters. A newly mounted orb receives the current call state and levels immediately. Unmounting
+the visuals leaves the call running. Clients without this optional method report zero input.
 
 The core mapping is:
 

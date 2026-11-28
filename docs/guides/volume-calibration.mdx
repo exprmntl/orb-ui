@@ -28,6 +28,9 @@ the provider exposes both. Vapi meters input from its SDK-owned local microphone
 - `inputVolume` is active while the user is being heard.
 - `outputVolume` is active while the assistant is speaking.
 
+Orb clamps both levels to this range before passing them to built-in themes and `renderTheme`.
+Missing or non-finite levels become zero. This also applies when your app supplies `signal` directly.
+
 The distribution matters as much as the endpoints. Normal speech should move through the middle of
 the range instead of remaining near zero or saturating at one. This lets a theme or animation preset
 work consistently across providers.
