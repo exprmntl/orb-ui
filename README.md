@@ -84,12 +84,14 @@ The only difference is how the adapter obtains a provider session:
 | [OpenAI Realtime guide](https://orb-ui.com/docs/adapters/openai-realtime) | Return a fresh short-lived client secret from `getClientSecret`          |
 | [Gemini Live guide](https://orb-ui.com/docs/adapters/gemini-live)         | Open the official Google Live session in `connect`                       |
 | [Retell WebCall](https://orb-ui.com/docs/adapters/retell)                 | Pass the current Retell client with developer-owned session creation     |
-| [Hume EVI](https://orb-ui.com/docs/adapters/hume)                         | Observe your existing `VoiceProvider` and `useVoice` values              |
 | [Deepgram Voice Agent](https://orb-ui.com/docs/adapters/deepgram)         | Connect the browser SDK or observe its React provider                    |
 | [Agora Conversational AI](https://orb-ui.com/docs/adapters/agora)         | Observe your toolkit and app-owned RTC audio                             |
 | [Azure Voice Live](https://orb-ui.com/docs/adapters/azure-voice-live)     | Supply an authenticated JavaScript session; adapter owns PCM audio       |
 | [Cartesia Managed Agents](https://orb-ui.com/docs/adapters/cartesia)      | Return a short-lived Line agent WebSocket URL from your backend          |
 | [Amazon Nova 2 Sonic](https://orb-ui.com/docs/adapters/nova-sonic)        | Run the Node/Socket.IO/Bedrock recipe; use its controlled browser bridge |
+
+Hume retired its hosted EVI API on November 13, 2026. Existing projects can still use the
+bridge to replay recorded signals. [Archived Hume guide](https://orb-ui.com/docs/adapters/hume)
 
 The adapter owns provider event mapping and emits one consistent `OrbSignal`. OpenAI and Gemini
 standard API keys, and LiveKit participant-token signing, stay on your server. See the
@@ -113,7 +115,7 @@ your own authenticated backend and short-lived browser credentials; provider sec
 The developer provider playground is available through `pnpm dev:demo` at localhost.
 
 The seven expansion integrations require `orb-ui@0.10.0` or later. Install that version to use
-the exported APIs; credential-based live provider tests have not been run.
+the exported APIs. Live verification status varies by provider.
 See the [expansion checklist](EXPANSION_CHECKLIST.md) for all fifteen additions and their
 verification and publication boundaries.
 

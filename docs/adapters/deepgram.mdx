@@ -3,7 +3,7 @@ title: Deepgram Voice Agent UI for React
 description: Build a playback-aware Deepgram voice agent orb with the browser SDK or your existing React AgentProvider, with safe local simulations and explicit audio ownership.
 ---
 
-> Requires `orb-ui@0.10.0` or later. SDK types, offline fixtures, and browser lifecycle tests have been checked. Live provider credential tests have not been run.
+> Requires `orb-ui@0.10.0` or later. The browser adapter has completed an authenticated voice call using inline agent settings and a short-lived grant.
 
 Connect Deepgram Voice Agent to an audio-reactive orb without adding a second microphone or
 speaker pipeline. Use `createDeepgramAdapter` for browser SDK resources, or
@@ -30,13 +30,13 @@ explore the state transitions before connecting your own application.
 ## Install and choose an audio owner
 
 ```bash
-pnpm add orb-ui@0.10.0 @deepgram/agents@0.1.2
+pnpm add orb-ui@0.10.0 @deepgram/agents@0.2.0
 # For an existing React provider:
 pnpm add @deepgram/react@0.2.0
 ```
 
-The SDK versions were checked on October 6, 2026. They are application dependencies; orb-ui
-imports no Deepgram runtime. The examples below are optional live integrations using your
+The examples typecheck against these SDK versions. Your app supplies the Deepgram runtime.
+The examples below are optional live integrations using your
 application's backend and account. The public simulation above never calls a token endpoint.
 
 | Application                               | Adapter                      | Audio ownership                                              |
@@ -197,8 +197,9 @@ speech for full-duplex interactions.
 
 ## Verify in your application
 
-Synthetic event tests and real SDK type fixtures cover these mappings. Credentialed Deepgram
-sessions were **not run**. Test HTTPS microphone permission, denied permission, browser audio
+Run `pnpm qa:live -g deepgram` to verify that a spoken question produces reply audio and that
+the browser adapter returns to idle on stop. The React observer is covered by synthetic events
+and SDK type checks. Test HTTPS microphone permission, denied permission, browser audio
 unlock, disconnect/reconnect, barge-in, stop during authorization, and route unmount in your own
 application before shipping. The current SDK player does not expose an audio-context resume
 failure event: confirm audible output on your target browsers and expose an application retry

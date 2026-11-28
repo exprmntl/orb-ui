@@ -89,7 +89,7 @@ const geminiClient = new GoogleGenAI({ apiKey: 'short-lived-live-token' })
 const geminiLiveAdapter = createGeminiLiveAdapter({
   connect: async (callbacks) =>
     geminiClient.live.connect({
-      model: 'gemini-3.1-flash-live-preview',
+      model: 'gemini-3.8-live',
       config: { responseModalities: [Modality.AUDIO] },
       callbacks,
     }),

@@ -96,6 +96,41 @@ button removes the selected provider's values. To prefill the fields during loca
 copy `demo/.env.example` to `demo/.env.local`, fill in non-secret `VITE_*` defaults, and restart the
 demo server. Use development agents and never commit `.env.local`.
 
+### Repeat a live voice check
+
+Build the checkout with `pnpm build`. Run `pnpm qa:live --list` to see the available calls,
+then select a provider, for example `pnpm qa:live -g gemini`. Each selected case opens a
+billed session in a local browser, speaks a short synthetic question, checks Orb's
+input and reply audio levels, and ends the session. The Gemini selection calls both 3.8
+Live variants. Each run uses a fresh Chrome profile with no microphone hardware, recordings,
+or saved browser credentials. The live suite runs separately from `pnpm check`.
+
+Supply settings through the test process environment or macOS Keychain. On a Mac, save each
+value once under service `orb-ui-qa`, with its setting name as the account. For example,
+`security add-generic-password -U -s orb-ui-qa -a GEMINI_API_KEY -w` prompts for the value.
+The test reads it on later runs. Keep private keys out of chat, shell arguments and `VITE_*`.
+
+| Live voice test              | Test account settings                                                                                       |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Gemini Live, both variants   | `GEMINI_API_KEY`                                                                                            |
+| OpenAI Realtime and GPT-Live | `OPENAI_API_KEY` with access to the selected models                                                         |
+| Vapi                         | `VAPI_PUBLIC_KEY`, `VAPI_ASSISTANT_ID`                                                                      |
+| ElevenLabs                   | `ELEVENLABS_AGENT_ID` for a public test agent                                                               |
+| LiveKit                      | `LIVEKIT_SANDBOX_ID`, `LIVEKIT_AGENT_NAME` for a running worker                                             |
+| Pipecat Cloud                | `PIPECAT_PUBLIC_KEY`, `PIPECAT_AGENT_NAME` for a deployed bot                                               |
+| Deepgram                     | `DEEPGRAM_API_KEY` for a Member project key that can issue grants. The test supplies inline agent settings. |
+| Cartesia                     | `CARTESIA_API_KEY`, `CARTESIA_AGENT_ID` for a deployed Line agent                                           |
+
+The remaining integrations have their own credential and backend setup. Use their live
+examples for QA. The embedded previews on the guide pages simulate calls.
+
+| Live example                                           | What to provision                                                                           |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| [Retell](docs/adapters/retell.mdx)                     | Test agent ID and a server API key for creating and stopping web calls                      |
+| [Agora](docs/adapters/agora.mdx)                       | A test backend that creates voice-agent sessions, issues RTC/RTM tokens and stops the agent |
+| [Azure Voice Live](docs/adapters/azure-voice-live.mdx) | Voice Live resource endpoint, model access and an authorized Microsoft Entra identity       |
+| [Amazon Nova 2 Sonic](examples/nova-sonic/README.md)   | AWS development profile with streaming Bedrock model access in the selected region          |
+
 ### Verification
 
 Before opening a PR, run:

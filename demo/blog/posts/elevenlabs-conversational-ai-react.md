@@ -9,7 +9,8 @@ category: Tutorial
 
 The result has Start and Stop controls, connection and speaking status, a live text-event feed, and cleanup when the component unmounts. It uses a private agent and explicitly selects WebRTC. The standard ElevenLabs API key stays on your server.
 
-Sources checked **September 28, 2026**. The example targets `@elevenlabs/client@1.9.0`. Its code is checked against that SDK and its lifecycle is tested with a simulated provider; an authenticated, billed ElevenLabs conversation has not been verified for this article. Run the final microphone and agent checks with your own account before deploying it.
+The React example was checked against `@elevenlabs/client@1.38.0` on **November 25, 2026**.
+The lifecycle tests use a simulated provider. Verify a microphone call with your own agent before deploying.
 
 ## How the connection works
 
@@ -38,7 +39,7 @@ Use Node.js 22.12 or newer and run:
 npm create vite@latest elevenlabs-react-agent -- --template react-ts
 cd elevenlabs-react-agent
 npm install
-npm install @elevenlabs/client@1.9.0 express
+npm install @elevenlabs/client@1.38.0 express
 ```
 
 Append `.env` to `.gitignore`. Create `.env` at the project root:

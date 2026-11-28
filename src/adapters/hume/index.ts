@@ -25,7 +25,7 @@ export function humeFftToVolume(bands: readonly number[] | undefined) {
   return Math.sqrt(sum / bands.length)
 }
 
-/** Controlled React bridge: the existing VoiceProvider keeps all audio ownership. */
+/** @deprecated Hume retired hosted EVI on November 13, 2026. Retained for legacy snapshots. */
 export function humeVoiceToOrbSignal(snapshot: HumeVoiceSnapshot): OrbSignal {
   if (snapshot.status.value === 'error' || snapshot.error) {
     return {
@@ -84,6 +84,7 @@ export interface HumeOrbAdapter extends OrbAdapter {
 /**
  * Session-scoped observer for an app-owned Hume VoiceProvider. It captures no
  * microphone, creates no audio player, and opens no provider connection itself.
+ * @deprecated Hume retired hosted EVI on November 13, 2026. Retained for existing integrations.
  */
 export function createHumeAdapter(options: HumeAdapterOptions = {}): HumeOrbAdapter {
   const listeners = new Set<OrbSignalListener>()

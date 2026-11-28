@@ -125,7 +125,7 @@ const DEFAULT_OPENAI_LIVE_BACKEND = 'gpt-5.6-terra'
 const DEFAULT_OPENAI_LIVE_INSTRUCTIONS =
   'You are a concise, friendly voice assistant. Respond naturally, honor interruptions, and delegate factual questions to the backend.'
 const DEFAULT_OPENAI_VOICE = 'marin'
-const DEFAULT_GEMINI_MODEL = 'gemini-3.1-flash-live-preview'
+const DEFAULT_GEMINI_MODEL = 'gemini-3.8-live'
 const DEFAULT_GEMINI_VOICE = 'Kore'
 const DEFAULT_INSTRUCTIONS =
   'You are a concise, friendly voice assistant helping test a realtime React UI.'
@@ -573,6 +573,10 @@ function writeStoredConfig(
       JSON.stringify({
         ...config,
         openAILiveApiKey: undefined,
+        openAIApiKey: undefined,
+        geminiApiKey: undefined,
+        pipecatApiKey: undefined,
+        liveKitParticipantToken: undefined,
         provider,
         theme,
         themePreset,
@@ -595,8 +599,7 @@ function readEnvConfig(): ProviderConfig {
     liveKitAgentName: import.meta.env.VITE_LIVEKIT_AGENT_NAME ?? '',
     liveKitRoomPrefix: import.meta.env.VITE_LIVEKIT_ROOM_PREFIX ?? DEFAULT_LIVEKIT_ROOM_PREFIX,
     liveKitServerUrl: import.meta.env.VITE_LIVEKIT_SERVER_URL ?? '',
-    liveKitParticipantToken:
-      import.meta.env.VITE_LIVEKIT_PARTICIPANT_TOKEN ?? import.meta.env.VITE_LIVEKIT_TOKEN ?? '',
+    liveKitParticipantToken: '',
     pipecatConnectionMode: normalizePipecatConnectionMode(import.meta.env.VITE_PIPECAT_MODE),
     pipecatApiKey: '',
     pipecatAgentName: import.meta.env.VITE_PIPECAT_AGENT_NAME ?? '',
@@ -2167,9 +2170,8 @@ function ProviderPlayground() {
                   />
                 </div>
                 <p className="provider-note">
-                  {provider === 'openai-live'
-                    ? 'Model settings are saved in this browser. Pasted Live keys stay in page memory; the saved local key stays on the server.'
-                    : 'Configuration, including credentials, is saved in this browser for this exact playground URL. Use Clear to remove the current provider’s saved values.'}
+                  Public IDs and settings are saved in this browser. Pasted API secrets and
+                  participant tokens stay in memory until you reload.
                 </p>
                 <div className="provider-config-actions">
                   <button className="provider-button" onClick={resetProviderConfig} type="button">

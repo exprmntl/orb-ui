@@ -48,10 +48,8 @@ In a second terminal, run `npm run dev` from `examples/nova-sonic`, then open
 the microphone, and streams an authored transcript with a quiet synthetic tone. The controls also
 exercise an interruption and a connection failure. Restart creates a fresh application session.
 
-The example pins `@aws-sdk/client-bedrock-runtime` **3.1146.0**, `@smithy/node-http-handler`
-**4.12.1**, and `socket.io` / `socket.io-client` **4.8.4**. These versions and the official model
-event reference were checked on **October 6, 2026**. AWS's generic SDK declaration still describes
-the earlier Sonic model in a comment; the current Nova 2 sample and guide use
+The example pins `@aws-sdk/client-bedrock-runtime` **3.1178.0**, `@smithy/node-http-handler`
+**4.14.2**, and `socket.io` / `socket.io-client` **4.8.4**. It uses the Bedrock model
 `amazon.nova-2-sonic-v1:0`.
 
 ## Observe your existing session

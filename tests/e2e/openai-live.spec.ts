@@ -4,6 +4,8 @@ test('GPT-Live adapter negotiates browser WebRTC, meters audio, and finalizes', 
   page,
 }) => {
   await page.goto('/')
+  // Let Chrome expose host ICE candidates to the local peers. Audio comes from the oscillator.
+  await page.context().grantPermissions(['microphone'], { origin: new URL(page.url()).origin })
   const result = await page.evaluate(async () => {
     const { createOpenAILiveAdapter } = window as unknown as {
       createOpenAILiveAdapter: typeof import('orb-ui/adapters').createOpenAILiveAdapter

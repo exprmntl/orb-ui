@@ -106,5 +106,5 @@ own authenticated backend and explicit per-user usage/payment policy.
 - [Output events](https://docs.aws.amazon.com/nova/latest/nova2-userguide/sonic-output-events.html)
 - [Barge-in](https://docs.aws.amazon.com/nova/latest/nova2-userguide/sonic-barge-in.html)
 
-Pinned provider dependencies: `@aws-sdk/client-bedrock-runtime@3.1146.0`,
-`@smithy/node-http-handler@4.12.1`, `socket.io@4.8.4`, `socket.io-client@4.8.4`.
+The recipe pins `@aws-sdk/client-bedrock-runtime@3.1178.0`, `@smithy/node-http-handler@4.14.2`,
+`socket.io@4.8.4`, and `socket.io-client@4.8.4`.

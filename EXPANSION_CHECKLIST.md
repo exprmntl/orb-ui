@@ -2,15 +2,15 @@
 
 All fifteen additions have implementation, setup instructions, a copyable typed example, and a
 canonical page with an embedded local simulation. The seven new integration exports are available
-in `orb-ui@0.10.0` and later. Live credential-based provider tests have not been run; simulated
-previews do not establish live provider reliability.
+in `orb-ui@0.10.0` and later. Deepgram and Cartesia have passed authenticated voice calls.
+Retell, Agora, Azure Voice Live, and Nova 2 Sonic still need live verification.
 
 ## Integrations
 
 | Addition                | Implementation and coverage                                                                                                           | Canonical page                              |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
 | Retell WebCall          | Current session status/audio events; PCM speaking estimate; controlled application turn observer; stale session and shutdown fixtures | [Retell](docs/adapters/retell.mdx)          |
-| Hume EVI                | Observe an existing VoiceProvider/useVoice session and FFT values without a second microphone or player                               | [Hume](docs/adapters/hume.mdx)              |
+| Hume EVI (retired)      | Historical VoiceProvider bridge and local replay                                                                                      | [Hume](docs/adapters/hume.mdx)              |
 | Deepgram Voice Agent    | Browser SDK adapter and controlled React provider bridge; microphone/player ownership, interruption and cleanup fixtures              | [Deepgram](docs/adapters/deepgram.mdx)      |
 | Agora Conversational AI | Toolkit events and existing RTC tracks; application-owned authorization, audio and agent teardown                                     | [Agora](docs/adapters/agora.mdx)            |
 | Azure Voice Live        | Typed JavaScript session events; PCM worklet capture/playback, generation gaps, interruption and audio suspension handling            | [Azure](docs/adapters/azure-voice-live.mdx) |
@@ -20,7 +20,7 @@ previews do not establish live provider reliability.
 SDK versions and official references appear on each integration page. SDK declarations are used
 by `pnpm typecheck:examples`; provider SDKs are not bundled as orb-ui runtime dependencies.
 Retell playback-based speech is an estimate, and thinking/interruption require an application
-turn observer. Hume observes an existing session. Azure browser access requires the developer's
+turn observer. Azure browser access requires the developer's
 own authenticated principal. Nova is a fullstack recipe with AWS credentials confined to Node.
 
 ## React recipes
@@ -50,8 +50,8 @@ The expansion browser suite accepts `ORB_PREVIEW_URL` and an optional temporary
 disabled for that authenticated run.
 
 Browser coverage includes start/stop, interruption, reconnect, errors, repeated clicks,
-navigation/back, recipe switching/unmount, mobile layout and keyboard controls. No live provider
-credentials are used. Public demos only use simulated states, authored local data and committed
+navigation/back, recipe switching/unmount, mobile layout and keyboard controls. These offline
+checks use no provider credentials. Public demos only use simulated states, authored local data and committed
 audio. Public provider proxy functions reject requests before reading a body or calling upstream.
 Local developer tools require loopback access and developer-owned credentials.
 

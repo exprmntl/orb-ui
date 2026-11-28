@@ -14,8 +14,8 @@
     "node": ">=22.12"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "3.1146.0",
-    "@smithy/node-http-handler": "4.12.1",
+    "@aws-sdk/client-bedrock-runtime": "3.1178.0",
+    "@smithy/node-http-handler": "4.14.2",
     "orb-ui": "file:../..",
     "react": "18.3.1",
     "react-dom": "18.3.1",

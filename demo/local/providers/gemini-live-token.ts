@@ -1,4 +1,4 @@
-import { GoogleGenAI, Modality } from '@google/genai'
+import { GoogleGenAI, Modality, ThinkingLevel } from '@google/genai'
 
 interface GeminiLiveTokenRequest {
   apiKey?: string
@@ -30,9 +30,12 @@ export default {
     const apiKey = body.apiKey?.trim()
     if (!apiKey) return json({ error: 'A Gemini API key is required.' }, { status: 400 })
 
-    const model = body.model?.trim() || 'gemini-3.1-flash-live-preview'
+    const model = body.model?.trim() || 'gemini-3.8-live'
     const liveConfig = {
       responseModalities: [Modality.AUDIO],
+      ...(model.replace(/^models\//, '') === 'gemini-3.8-live-extended-thinking'
+        ? { thinkingConfig: { thinkingLevel: ThinkingLevel.MEDIUM } }
+        : {}),
       speechConfig: {
         voiceConfig: {
           prebuiltVoiceConfig: {
