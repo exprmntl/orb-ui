@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { OrbSignal } from '../types'
+import { createVolumeNormalizer } from '../audio-level'
+import { PCM_VOLUME_CALIBRATION } from '../volume-presets'
 import {
   createDeepgramAdapter,
   createDeepgramReactAdapter,
@@ -104,6 +106,20 @@ describe('Deepgram browser adapter (synthetic protocol/audio fixtures)', () => {
     vi.advanceTimersByTime(40)
     expect(f.last().state).toBe('listening')
     expect(f.last().outputVolume).toBe(0)
+    f.unsubscribe()
+  })
+
+  it('keeps byte-quantization noise quiet and clears input immediately on mute', async () => {
+    const f = fixture()
+    f.microphone.level = 4 / 128
+    await ready(f)
+    expect(f.last().inputVolume).toBe(0)
+    f.microphone.level = 0.4
+    vi.advanceTimersByTime(100)
+    expect(f.last().inputVolume).toBeGreaterThan(0.3)
+    f.microphone.muted = true
+    vi.advanceTimersByTime(40)
+    expect(f.last().inputVolume).toBe(0)
     f.unsubscribe()
   })
 
@@ -272,7 +288,11 @@ describe('Deepgram React provider observer', () => {
     const adapter = createDeepgramReactAdapter({ getSnapshot: () => snapshot, start, stop })
     const signals: OrbSignal[] = []
     const unsubscribe = adapter.subscribe((signal) => signals.push(signal))
-    expect(signals.at(-1)).toEqual({ state: 'speaking', inputVolume: 0.4, outputVolume: 0.7 })
+    const waveformLevel = (sdkLevel: number) =>
+      createVolumeNormalizer(PCM_VOLUME_CALIBRATION).sample(sdkLevel / 4, 0).normalized
+    expect(signals.at(-1)?.state).toBe('speaking')
+    expect(signals.at(-1)?.inputVolume).toBeCloseTo(waveformLevel(0.4), 10)
+    expect(signals.at(-1)?.outputVolume).toBeCloseTo(waveformLevel(0.7), 10)
     snapshot = { ...snapshot, outputMuted: true, micMuted: true }
     vi.advanceTimersByTime(40)
     expect(signals.at(-1)).toEqual({ state: 'listening', inputVolume: 0, outputVolume: 0 })

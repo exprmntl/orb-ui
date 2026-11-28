@@ -105,6 +105,35 @@ input and reply audio levels, and ends the session. The Gemini selection calls b
 Live variants. Each run uses a fresh Chrome profile with no microphone hardware, recordings,
 or saved browser credentials. The live suite runs separately from `pnpm check`.
 
+To compare providers, run the same question at three microphone gains. Select the providers
+you have configured. Each selected case opens one billed session per gain.
+
+```bash
+for gain in 0.45 1 1.4; do
+  ORB_QA_MEASURE_VOLUME=1 ORB_QA_MIC_GAIN="$gain" pnpm qa:live -g 'openai-realtime|gemini-3.8-live$'
+done
+```
+
+Each `ORB_QA_VOLUME` line contains the quiet input's 90th percentile and the median and 90th
+percentile during voiced parts of the recording. Reply text and voices vary by call.
+`replyBias` compares the displayed output level with a fixed reference derived independently
+from that call's browser playback. Positive values mean the orb reads higher. A null means
+fewer than ten audible samples could be matched. The test retains numeric levels only.
+
+For a seven-level sweep, run `ORB_QA_VOLUME_SWEEP=1 pnpm qa:live -g 'elevenlabs|livekit'`.
+Each selected provider answers one real question, then receives two speech recordings at
+silence and six gains from 0.15× to 1.4×. The second recording runs in reverse order.
+`ORB_QA_SWEEP` reports the median input alongside the level expected from the recorded waveform.
+`ORB_QA_PLAYBACK` groups real reply measurements by quiet, ordinary and loud playback and
+reports the number of matched samples in each band. An empty band means the reply never reached it.
+Numeric traces are saved under Playwright's test output directory.
+The sweep fails when a voiced median differs from the reference by more than 0.10 on the
+0–1 scale, or when the zero-gain median exceeds 0.02.
+
+For ElevenLabs and LiveKit, add `ORB_QA_PROBE_OUTPUT=1` to route the same recorded waveform
+through the connected SDK's receive analysers during the sweep. This measures input and output
+against identical audio. The initial real reply is measured before rerouting.
+
 Supply settings through the test process environment or macOS Keychain. On a Mac, save each
 value once under service `orb-ui-qa`, with its setting name as the account. For example,
 `security add-generic-password -U -s orb-ui-qa -a GEMINI_API_KEY -w` prompts for the value.

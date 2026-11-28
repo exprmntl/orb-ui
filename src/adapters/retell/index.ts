@@ -1,5 +1,6 @@
 import type { OrbAdapter, OrbSignal, OrbSignalListener } from '../types'
 import { createVolumeNormalizer } from '../audio-level'
+import { PCM_VOLUME_CALIBRATION } from '../volume-presets'
 import type { VolumeCalibrationSource, VolumeSample } from '../audio-level'
 
 /** Public WebCall session statuses from retell-client-js-sdk. */
@@ -88,13 +89,7 @@ export function createRetellAdapter(
   options: RetellAdapterOptions,
 ): RetellOrbAdapter {
   const listeners = new Set<OrbSignalListener>()
-  const output = createVolumeNormalizer(
-    {
-      amplitude: { silenceFloor: 0.003, speechReference: 0.08, speechPeak: 0.3 },
-      envelope: { riseTimeMs: 100, fallTimeMs: 200 },
-    },
-    options.outputVolumeCalibration,
-  )
+  const output = createVolumeNormalizer(PCM_VOLUME_CALIBRATION, options.outputVolumeCalibration)
   let signal: OrbSignal = { state: 'idle', inputVolume: 0, outputVolume: 0 }
   let generation = 0
   let activeCall: RetellWebCallSession | undefined

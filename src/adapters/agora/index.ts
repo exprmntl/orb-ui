@@ -1,9 +1,6 @@
 import type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from '../types'
-import {
-  createVolumeNormalizer,
-  DEFAULT_VOLUME_CALIBRATION,
-  type VolumeCalibrationSource,
-} from '../audio-level'
+import type { VolumeCalibrationSource } from '../audio-level'
+import { createAgoraMeter } from './volume'
 
 export interface AgoraAgentStateEvent {
   state: 'idle' | 'listening' | 'thinking' | 'speaking' | 'silent'
@@ -118,8 +115,8 @@ interface Attempt {
 /** Observes your toolkit/RTC session; never opens another capture or playback path. */
 export function createAgoraAdapter(options: AgoraAdapterOptions): AgoraOrbAdapter {
   const listeners = new Set<OrbSignalListener>()
-  const input = createVolumeNormalizer(DEFAULT_VOLUME_CALIBRATION, options.inputVolumeCalibration)
-  const output = createVolumeNormalizer(DEFAULT_VOLUME_CALIBRATION, options.outputVolumeCalibration)
+  const input = createAgoraMeter(options.inputVolumeCalibration)
+  const output = createAgoraMeter(options.outputVolumeCalibration)
   let signal: OrbSignal = { state: 'idle', inputVolume: 0, outputVolume: 0 }
   let active: Attempt | undefined
   let starting: Promise<void> | undefined
@@ -175,8 +172,9 @@ export function createAgoraAdapter(options: AgoraAdapterOptions): AgoraOrbAdapte
       const microphone = call.session.getMicrophoneTrack()
       const track = call.session.getAgentAudioTrack()
       const rawOutput = !call.interrupted && track?.isPlaying ? track.getVolumeLevel() : 0
+      const outputSample = output.sample(rawOutput)
       const now = performance.now()
-      if (rawOutput > 0.001) call.lastAudibleAt = now
+      if (rawOutput > 0.001 && outputSample.mapped > 0) call.lastAudibleAt = now
       // Short silence hold covers syllable gaps, never provider generation alone.
       const speaking = !call.interrupted && !!track?.isPlaying && now - call.lastAudibleAt < 180
       const state = speaking
@@ -188,7 +186,7 @@ export function createAgoraAdapter(options: AgoraAdapterOptions): AgoraOrbAdapte
         state,
         input.sample(microphone?.enabled === false ? 0 : (microphone?.getVolumeLevel() ?? 0))
           .normalized,
-        speaking ? output.sample(rawOutput).normalized : 0,
+        speaking ? outputSample.normalized : 0,
       )
     } catch (error) {
       fail(call, error)

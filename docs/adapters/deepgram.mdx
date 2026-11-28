@@ -178,6 +178,9 @@ Do not use the managed browser adapter for the same provider session.
 
 ## State mapping and interruptions
 
+Both Deepgram adapters compensate for the SDK’s four-times RMS meter scale and apply the
+same speech envelope to microphone input and assistant playback.
+
 | Signal                                                     | Orb state                                             |
 | ---------------------------------------------------------- | ----------------------------------------------------- |
 | Start, connection attempt, automatic reconnect             | `connecting`, with cleared meters                     |

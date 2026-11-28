@@ -259,6 +259,11 @@ and pass existing sessions through this bridge rather than initializing competin
 
 ## Playback, turn taking, and reconnects
 
+The adapter converts Agora RTC's logarithmic track readings to waveform RMS before animating
+the orb. Existing custom `inputVolumeCalibration` and `outputVolumeCalibration` overrides
+continue to use Agora's SDK units. An offline browser test checks the pinned SDK against seven
+known audio amplitudes.
+
 | Event or audio condition                                               | Orb state                                       |
 | ---------------------------------------------------------------------- | ----------------------------------------------- |
 | Backend/permission/RTC setup, RTC reconnecting                         | `connecting`                                    |

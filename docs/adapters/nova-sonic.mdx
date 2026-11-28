@@ -191,6 +191,9 @@ provider secrets belong in `VITE_*` variables, query strings, or copied browser 
 
 ## Verification and limits
 
+The browser recipe uses orb-ui’s shared PCM calibration for microphone and playback RMS.
+Applications using the bridge directly supply their own normalized levels.
+
 The bridge has synthetic lifecycle, stale-session, volume, transcript, and interruption tests. The
 recipe adds offline AWS byte-envelope fixtures, startup/shutdown ordering, input backpressure,
 Socket.IO origin/token checks, and browser PCM playback checks using the real published SDK

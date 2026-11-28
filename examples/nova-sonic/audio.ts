@@ -1,4 +1,8 @@
-import type { NovaSonicEvent } from 'orb-ui/adapters'
+import {
+  createVolumeNormalizer,
+  PCM_VOLUME_CALIBRATION,
+  type NovaSonicEvent,
+} from 'orb-ui/adapters'
 import { OUTPUT_RATE } from './protocol'
 
 export function decodePcm16(base64: string) {
@@ -14,6 +18,7 @@ export function decodePcm16(base64: string) {
 }
 
 export class PcmPlayer {
+  private readonly volume = createVolumeNormalizer(PCM_VOLUME_CALIBRATION)
   private readonly sources = new Set<AudioBufferSourceNode>()
   private readonly rates = new Map<string, number>()
   private readonly interrupted = new Set<string>()
@@ -33,7 +38,7 @@ export class PcmPlayer {
     this.meter = setInterval(() => {
       this.analyser.getFloatTimeDomainData(samples)
       const rms = Math.sqrt(samples.reduce((sum, value) => sum + value * value, 0) / samples.length)
-      this.update(this.sources.size > 0, Math.min(1, rms * 5))
+      this.update(this.sources.size > 0, this.volume.sample(rms).normalized)
     }, 33)
   }
 
@@ -91,6 +96,7 @@ export class PcmPlayer {
       source.disconnect()
     })
     this.sources.clear()
+    this.volume.reset()
     this.nextTime = this.context.currentTime
     this.update(false, 0)
   }

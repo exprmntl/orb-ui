@@ -1,9 +1,22 @@
 import type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from '../types'
 import {
   createVolumeNormalizer,
-  DEFAULT_VOLUME_CALIBRATION,
   type VolumeCalibrationSource,
+  type VolumeNormalizer,
 } from '../audio-level'
+import { DEEPGRAM_VOLUME_CALIBRATION } from '../volume-presets'
+
+// The SDK measures 8-bit time-domain samples, then multiplies RMS by four.
+// Sub-LSB input can alternate between byte values 127 and 128 in quiet rooms.
+const SDK_NOISE_FLOOR = 4 / 128
+
+function meterLevel(meter: VolumeNormalizer, raw: number | undefined, filterNoise = true) {
+  if (raw === undefined) {
+    meter.reset()
+    return 0
+  }
+  return meter.sample(filterNoise && raw <= SDK_NOISE_FLOOR ? 0 : raw).normalized
+}
 
 export type DeepgramConnectionState =
   | 'idle'
@@ -93,8 +106,11 @@ interface ActiveSession extends DeepgramResources {
 /** Owns the injected SDK resources, not a second microphone or playback engine. */
 export function createDeepgramAdapter(options: DeepgramAdapterOptions): DeepgramOrbAdapter {
   const listeners = new Set<OrbSignalListener>()
-  const input = createVolumeNormalizer(DEFAULT_VOLUME_CALIBRATION, options.inputVolumeCalibration)
-  const output = createVolumeNormalizer(DEFAULT_VOLUME_CALIBRATION, options.outputVolumeCalibration)
+  const input = createVolumeNormalizer(DEEPGRAM_VOLUME_CALIBRATION, options.inputVolumeCalibration)
+  const output = createVolumeNormalizer(
+    DEEPGRAM_VOLUME_CALIBRATION,
+    options.outputVolumeCalibration,
+  )
   let signal: OrbSignal = { state: 'idle', inputVolume: 0, outputVolume: 0 }
   let active: ActiveSession | undefined
   let starting: Promise<void> | undefined
@@ -141,8 +157,12 @@ export function createDeepgramAdapter(options: DeepgramAdapterOptions): Deepgram
       const next = speaking ? 'speaking' : call.generating ? 'thinking' : 'listening'
       emit(
         next,
-        input.sample(call.microphone.muted ? 0 : call.microphone.getInputVolume()).normalized,
-        speaking ? output.sample(rawOutput).normalized : 0,
+        meterLevel(
+          input,
+          call.microphone.muted ? undefined : call.microphone.getInputVolume(),
+          !options.inputVolumeCalibration,
+        ),
+        meterLevel(output, speaking ? rawOutput : undefined, !options.outputVolumeCalibration),
       )
     } catch (error) {
       fail(call, error)
@@ -349,17 +369,18 @@ export function createDeepgramReactAdapter(
   let stopped = false
   let generation = 0
   let heardAudio = false
-  const volume = (raw: number) => (Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : 0)
+  const input = createVolumeNormalizer(DEEPGRAM_VOLUME_CALIBRATION)
+  const output = createVolumeNormalizer(DEEPGRAM_VOLUME_CALIBRATION)
   function sample() {
     try {
       const snapshot = options.getSnapshot()
       const outputVolume =
         snapshot.state === 'connected' && snapshot.mode === 'speaking' && !snapshot.outputMuted
-          ? volume(snapshot.getOutputVolume())
+          ? snapshot.getOutputVolume()
           : 0
       if (snapshot.mode !== 'speaking' || snapshot.outputMuted || snapshot.state !== 'connected')
         heardAudio = false
-      if (outputVolume > 0.001) heardAudio = true
+      if (Number.isFinite(outputVolume) && outputVolume > 0.001) heardAudio = true
       const state: OrbState =
         error !== undefined || snapshot.error !== undefined
           ? 'error'
@@ -379,15 +400,19 @@ export function createDeepgramReactAdapter(
       const connected = state !== 'idle' && state !== 'connecting' && state !== 'error'
       const signal: OrbSignal = {
         state,
-        inputVolume:
+        inputVolume: meterLevel(
+          input,
           connected && snapshot.micActive && !snapshot.micMuted
-            ? volume(snapshot.getInputVolume())
-            : 0,
-        outputVolume: state === 'speaking' ? outputVolume : 0,
+            ? snapshot.getInputVolume()
+            : undefined,
+        ),
+        outputVolume: meterLevel(output, state === 'speaking' ? outputVolume : undefined),
         ...(state === 'error' ? { error: error ?? snapshot.error } : {}),
       }
       listeners.forEach((listener) => listener(signal))
     } catch (cause) {
+      input.reset()
+      output.reset()
       error = cause
       listeners.forEach((listener) =>
         listener({ state: 'error', inputVolume: 0, outputVolume: 0, error: cause }),
@@ -404,6 +429,8 @@ export function createDeepgramReactAdapter(
         if (!listeners.size && timer !== undefined) {
           clearInterval(timer)
           timer = undefined
+          input.reset()
+          output.reset()
         }
       }
     },

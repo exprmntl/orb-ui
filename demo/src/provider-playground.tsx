@@ -2086,13 +2086,21 @@ function ProviderPlayground() {
               </div>
               <div className="provider-status-item">
                 <span className="provider-status-label">Input</span>
-                <span className="provider-status-value" data-testid="qa-input-volume">
+                <span
+                  className="provider-status-value"
+                  data-testid="qa-input-volume"
+                  data-raw={latestSamples.input?.raw}
+                >
                   {formatVolume(displayedSignal.inputVolume)}
                 </span>
               </div>
               <div className="provider-status-item">
                 <span className="provider-status-label">Output</span>
-                <span className="provider-status-value" data-testid="qa-output-volume">
+                <span
+                  className="provider-status-value"
+                  data-testid="qa-output-volume"
+                  data-raw={latestSamples.output?.raw}
+                >
                   {formatVolume(displayedSignal.outputVolume)}
                 </span>
               </div>
