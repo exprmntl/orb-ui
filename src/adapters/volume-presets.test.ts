@@ -1,7 +1,11 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { createVolumeNormalizer, mapVolumeAmplitude } from './audio-level'
-import { PROVIDER_VOLUME_CALIBRATIONS } from './volume-presets'
+import {
+  DEEPGRAM_VOLUME_CALIBRATION,
+  PCM_VOLUME_CALIBRATION,
+  PROVIDER_VOLUME_CALIBRATIONS,
+} from './volume-presets'
 
 // Both committed fixtures contain mono, 16-bit little-endian PCM. Skip WAV metadata.
 function waveformRms(fixture: string) {
@@ -25,7 +29,7 @@ function waveformRms(fixture: string) {
 
 describe('provider volume calibrations', () => {
   it.each(['../../tests/live/question.wav', '../../demo/public/fixtures/narration.wav'])(
-    'keeps the OpenAI and Gemini playback envelopes aligned on %s',
+    'aligns waveform-based meters and the scaled Deepgram meter on %s',
     (fixture) => {
       const waveform = waveformRms(fixture)
       for (const [gain, lower, upper] of [
@@ -33,15 +37,27 @@ describe('provider volume calibrations', () => {
         [1, 0.45, 0.65],
         [1.4, 0.65, 0.85],
       ]) {
-        const traces = [
-          PROVIDER_VOLUME_CALIBRATIONS.openai,
-          PROVIDER_VOLUME_CALIBRATIONS.gemini,
-        ].map((profile) => {
-          const normalizer = createVolumeNormalizer(profile.output)
-          return waveform.map((rms, i) => normalizer.sample(rms * gain, i * 33).normalized)
-        })
-        expect(traces[0]).toEqual(traces[1])
-        const voiced = traces[0].filter((_, i) => waveform[i] >= 0.01).sort((a, b) => a - b)
+        const waveformMeter = createVolumeNormalizer(PCM_VOLUME_CALIBRATION)
+        const trace = waveform.map((rms, i) => waveformMeter.sample(rms * gain, i * 33).normalized)
+        const { openai, gemini, pipecat, vapi } = PROVIDER_VOLUME_CALIBRATIONS
+        for (const profile of [
+          openai.input,
+          openai.output,
+          gemini.input,
+          gemini.output,
+          pipecat.input,
+          pipecat.output,
+          vapi.input,
+          DEEPGRAM_VOLUME_CALIBRATION,
+        ]) {
+          const normalizer = createVolumeNormalizer(profile)
+          const scale = profile === DEEPGRAM_VOLUME_CALIBRATION ? 4 : 1
+          waveform.forEach((rms, i) => {
+            const raw = Math.min(1, rms * gain * scale)
+            expect(normalizer.sample(raw, i * 33).normalized).toBeCloseTo(trace[i], 10)
+          })
+        }
+        const voiced = trace.filter((_, i) => waveform[i] >= 0.01).sort((a, b) => a - b)
         const median = voiced[Math.floor((voiced.length - 1) / 2)]
         expect(median).toBeGreaterThan(lower)
         expect(median).toBeLessThan(upper)
@@ -50,13 +66,13 @@ describe('provider volume calibrations', () => {
   )
 
   it.each([
-    ['input', 0.35],
-    ['output', 0.39],
+    ['input', 0.33],
+    ['output', 0.31],
   ] as const)(
     'keeps ordinary ElevenLabs %s activity in the middle of the range',
     (direction, raw) => {
-      // Rounded voiced medians measured with client 1.9.0 in real WebRTC sessions.
-      // Frequency-based SDK levels are substantially higher than waveform RMS.
+      // Ordinary speech from the question and narration recordings on client 1.38.
+      // Both directions use the SDK's voice-band frequency meter.
       const normalizer = createVolumeNormalizer(PROVIDER_VOLUME_CALIBRATIONS.elevenlabs[direction])
       let normalized = 0
       for (let time = 0; time <= 1000; time += 33) {

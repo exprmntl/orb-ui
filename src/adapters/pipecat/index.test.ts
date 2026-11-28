@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createPipecatAdapter } from './index'
+import { createVolumeNormalizer } from '../audio-level'
+import { PCM_VOLUME_CALIBRATION } from '../volume-presets'
 import type { OrbSignal } from '../types'
 
 type Listener = (...args: unknown[]) => void
@@ -229,7 +231,9 @@ describe('createPipecatAdapter', () => {
     client.emit('botStartedSpeaking')
     client.emit('remoteAudioLevel', 0.05, { id: 'bot', local: false })
     const output = signals.at(-1)?.outputVolume ?? 0
-    expect(output).toBeGreaterThan(0.15)
+    expect(output).toBeCloseTo(
+      createVolumeNormalizer(PCM_VOLUME_CALIBRATION).sample(0.05).normalized,
+    )
     expect(signals.at(-1)?.inputVolume).toBe(releasedInput)
   })
 

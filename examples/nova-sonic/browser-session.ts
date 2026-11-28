@@ -1,5 +1,10 @@
 import { io, type Socket } from 'socket.io-client'
-import { createNovaSonicBridge, type NovaSonicTranscript } from 'orb-ui/adapters'
+import {
+  createNovaSonicBridge,
+  createVolumeNormalizer,
+  PCM_VOLUME_CALIBRATION,
+  type NovaSonicTranscript,
+} from 'orb-ui/adapters'
 import { PcmPlayer } from './audio'
 import type { ClientEvents, Mode, ServerEvents } from './protocol'
 
@@ -115,11 +120,12 @@ export class BrowserSession {
         run.source.connect(run.worklet)
         run.worklet.connect(run.silence)
         run.silence.connect(context.destination)
+        const inputVolume = createVolumeNormalizer(PCM_VOLUME_CALIBRATION)
         run.worklet.onprocessorerror = () =>
           this.fail(run, new Error('Audio capture failed. Restart the session.'))
         run.worklet.port.onmessage = (message: MessageEvent<{ pcm: ArrayBuffer; rms: number }>) => {
           if (this.run !== run || !run.ready) return
-          this.bridge.setInputVolume(id, Math.min(1, message.data.rms * 5))
+          this.bridge.setInputVolume(id, inputVolume.sample(message.data.rms).normalized)
           if (run.frames.length >= 20) {
             this.fail(run, new Error('Microphone transport stalled. Restart the session.'))
             return

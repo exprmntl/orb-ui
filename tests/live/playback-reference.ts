@@ -17,16 +17,27 @@ export function installPlaybackReference() {
   }
   AudioNode.prototype.connect = new Proxy(connect, {
     apply(target, source: AudioNode, args) {
-      const result = Reflect.apply(target, source, args)
-      if (args[0] === source.context.destination) {
-        let analyser = outputs.get(source.context)
-        if (!analyser) {
-          analyser = meter(source.context)
-          outputs.set(source.context, analyser)
-        }
-        Reflect.apply(target, source, [analyser, args[1] ?? 0])
+      if (args[0] !== source.context.destination) return Reflect.apply(target, source, args)
+      let analyser = outputs.get(source.context)
+      if (!analyser) {
+        analyser = meter(source.context)
+        outputs.set(source.context, analyser)
+        Reflect.apply(target, analyser, [source.context.destination])
+        // Keep the render graph pulling zero samples after the final player disconnects.
+        const silence = source.context.createConstantSource()
+        silence.offset.value = 0
+        Reflect.apply(target, silence, [analyser])
+        silence.start()
       }
-      return result
+      Reflect.apply(target, source, [analyser, ...args.slice(1)])
+      return args[0]
+    },
+  })
+  AudioNode.prototype.disconnect = new Proxy(AudioNode.prototype.disconnect, {
+    apply(target, source: AudioNode, args) {
+      const analyser = outputs.get(source.context)
+      if (analyser && args[0] === source.context.destination) args[0] = analyser
+      return Reflect.apply(target, source, args)
     },
   })
 
@@ -48,6 +59,10 @@ export function installPlaybackReference() {
       () => !el.paused && !el.muted && el.volume > 0 && el.srcObject === stream,
     )
     monitor.createMediaStreamSource(stream).connect(analyser)
+    const silent = monitor.createGain()
+    silent.gain.value = 0
+    Reflect.apply(connect, analyser, [silent])
+    Reflect.apply(connect, silent, [monitor.destination])
     void monitor.resume().catch(() => {})
   }
   const play = HTMLMediaElement.prototype.play
@@ -70,7 +85,7 @@ export function installPlaybackReference() {
     if (!meters.length) return
     let rms = 0
     for (const { analyser, audible, samples } of meters) {
-      if (!audible()) continue
+      if (analyser.context.state !== 'running' || !audible()) continue
       analyser.getFloatTimeDomainData(samples)
       let squares = 0
       for (const value of samples) squares += value * value

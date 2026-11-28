@@ -191,8 +191,8 @@ No microphone volume signal is supplied by this API, so `inputVolume` remains ze
 a second microphone merely to animate it. The optional transcript's text and stable item IDs do
 not mark exact playback boundaries, so this adapter never infers speaking from transcript updates.
 
-Output calibration uses a configurable visual PCM baseline, not measurements from a live Retell
-account. Override `outputVolumeCalibration` after measuring your own deployment if needed.
+Retell playback uses the shared waveform RMS calibration. The recorded-audio checks exercise
+this mapping locally. Override `outputVolumeCalibration` for a different playback pipeline.
 
 ## Lifecycle and browser audio
 

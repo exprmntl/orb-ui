@@ -22,7 +22,7 @@ class Events {
 function fixture() {
   const toolkit = Object.assign(new Events(), { interrupt: vi.fn(async () => undefined) })
   const rtc = Object.assign(new Events(), { connectionState: 'CONNECTED' })
-  const microphone = { enabled: true, getVolumeLevel: () => 0.25 }
+  const microphone = { enabled: true, getVolumeLevel: () => 0.8 } // 0.1 waveform RMS
   const audio = {
     isPlaying: true,
     level: 0,
@@ -81,7 +81,10 @@ describe('Agora toolkit/RTC bridge (synthetic provider fixtures)', () => {
     f.toolkit.emit('agent-thinking-changed', 'agent-42', false)
     f.toolkit.emit('agent-speaking-changed', 'agent-42', true)
     expect(f.last().state).toBe('thinking')
-    f.audio.level = 0.4
+    f.audio.level = 0.4 // -60 dBFS, below the waveform silence floor
+    vi.advanceTimersByTime(40)
+    expect(f.last().state).toBe('thinking')
+    f.audio.level = 0.8
     vi.advanceTimersByTime(40)
     expect(f.last().state).toBe('speaking')
     expect(f.last().outputVolume).toBeGreaterThan(0)

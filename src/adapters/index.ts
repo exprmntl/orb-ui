@@ -67,7 +67,11 @@ export {
   type VolumeNormalizer,
   type VolumeSample,
 } from './audio-level'
-export { PROVIDER_VOLUME_CALIBRATIONS, type DirectionalVolumeCalibration } from './volume-presets'
+export {
+  PCM_VOLUME_CALIBRATION,
+  PROVIDER_VOLUME_CALIBRATIONS,
+  type DirectionalVolumeCalibration,
+} from './volume-presets'
 export type { OrbAdapter, OrbSignal, OrbSignalListener, OrbState } from './types'
 export * from './retell'
 export * from './hume'

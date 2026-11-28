@@ -2,4 +2,4 @@
 'orb-ui': patch
 ---
 
-Use the same playback volume profile for OpenAI Realtime, GPT-Live, and Gemini Live so the same waveform drives consistent theme activity. App-provided calibration overrides still take precedence.
+Align waveform-based microphone and playback activity across providers. Account for Deepgram’s scaled meter and Agora’s logarithmic meter, and calibrate ElevenLabs and LiveKit against recorded speech. Custom adapters can reuse the exported PCM_VOLUME_CALIBRATION profile.

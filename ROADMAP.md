@@ -20,8 +20,9 @@ development harness.
 The local `qa:live` suite uses a recorded question and checks for reply audio. ElevenLabs,
 LiveKit, Pipecat, OpenAI Realtime, OpenAI GPT-Live, both Gemini 3.8 Live variants, Deepgram,
 and Cartesia have completed that round trip. The suite also includes a Vapi case.
-The suite can compare microphone levels for the same recorded question at multiple gains and
-check reply levels against browser playback. OpenAI and Gemini share a waveform playback profile.
+The volume sweep compares two recordings at seven gains, checks real replies against browser
+playback, and can feed the same signal to WebRTC receive meters. Waveform adapters share a PCM
+profile. The Agora RTC track meter also has an offline browser check.
 
 Hume retired its hosted EVI API on November 13, 2026. Its guide is archived and its bridge
 remains available for existing code. Retell, Agora, Azure Voice Live, and Nova 2 Sonic still

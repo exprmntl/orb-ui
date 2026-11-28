@@ -127,14 +127,17 @@ not intended as an installation step for every application.
 
 ## Repeatable provider QA
 
-Compare normalized activity, not equal raw numbers. ElevenLabs client 1.9.0 averages voice-band
-frequency bins. LiveKit client 2.20.0 computes a different frequency-bin measure with the adapter's
-analyser settings. Pipecat's browser track meters, OpenAI Realtime, and Gemini Live use waveform
-RMS. A raw value of `0.2` therefore does not represent the same audio level in every adapter.
+Use `createVolumeNormalizer(PCM_VOLUME_CALIBRATION)` from `orb-ui/adapters` when you measure
+waveform RMS in your own audio pipeline. Each direction needs its own normalizer.
+OpenAI, Gemini, Pipecat's browser track meters, Cartesia, Azure Voice Live, Vapi microphone
+input, Retell playback, and the Nova Sonic browser recipe use these anchors. Deepgram's browser
+SDK multiplies RMS by four and caps it at one. The Deepgram adapters account for that scale.
+Agora's default converts its logarithmic track level to RMS before applying the same curve.
 
-OpenAI Realtime, GPT-Live, and Gemini Live share a playback profile. The same waveform produces
-the same normalized envelope when sampled at the same times. Different voices and recordings
-can still produce different levels.
+ElevenLabs and LiveKit calculate activity from frequency bins. Each uses a profile calibrated
+against recorded speech. Timbre, the analysis window, and timing can affect these readings.
+Vapi's assistant-level event saturates before the loudest sounds. Retell reports zero for
+microphone activity because its web call API supplies playback samples only.
 
 For repeatable microphone tests, feed the same recorded speech at quiet, normal, and louder gains
 through the browser's microphone capture path, with silence between passages. Keep the SDK's

@@ -21,8 +21,21 @@ function calibration(
   }
 }
 
-// Shared by adapters that meter unscaled waveform RMS at browser playback.
-export const PCM_VOLUME_CALIBRATION = calibration(0.003, 0.1, 0.3)
+function pcmProfile() {
+  return calibration(0.002, 0.105112, 0.25)
+}
+
+/** Default for unscaled RMS measurements of mono microphone or playback samples. */
+export const PCM_VOLUME_CALIBRATION = Object.freeze(pcmProfile())
+Object.freeze(PCM_VOLUME_CALIBRATION.amplitude)
+Object.freeze(PCM_VOLUME_CALIBRATION.envelope)
+
+// AgentMicrophone and AgentPlayer return min(1, 4 * RMS).
+export const DEEPGRAM_VOLUME_CALIBRATION = calibration(
+  4 * PCM_VOLUME_CALIBRATION.amplitude.silenceFloor,
+  4 * PCM_VOLUME_CALIBRATION.amplitude.speechReference,
+  4 * PCM_VOLUME_CALIBRATION.amplitude.speechPeak,
+)
 
 /**
  * Shipped provider baselines. The playground calibration runner generates
@@ -30,27 +43,27 @@ export const PCM_VOLUME_CALIBRATION = calibration(0.003, 0.1, 0.3)
  */
 export const PROVIDER_VOLUME_CALIBRATIONS = {
   vapi: {
-    input: calibration(0, 0.105_112, 0.25),
+    input: pcmProfile(),
     output: calibration(0.005, 0.4, 1),
   },
   elevenlabs: {
-    input: calibration(0, 0.36, 0.52),
-    output: calibration(0, 0.4, 0.55),
+    input: calibration(0, 0.307, 0.447),
+    output: calibration(0, 0.307, 0.447),
   },
   livekit: {
-    input: calibration(0, 0.18, 0.4),
-    output: calibration(0.015, 0.18, 0.3),
+    input: calibration(0.002, 0.19, 0.247),
+    output: calibration(0.002, 0.19, 0.247),
   },
   pipecat: {
-    input: calibration(0.002, 0.107_112, 0.252),
-    output: calibration(0.002, 0.084_441, 0.198_078),
+    input: pcmProfile(),
+    output: pcmProfile(),
   },
   openai: {
-    input: calibration(0, 0.105_112, 0.25),
-    output: PCM_VOLUME_CALIBRATION,
+    input: pcmProfile(),
+    output: pcmProfile(),
   },
   gemini: {
-    input: calibration(0, 0.105_112, 0.25),
-    output: PCM_VOLUME_CALIBRATION,
+    input: pcmProfile(),
+    output: pcmProfile(),
   },
 } as const satisfies Record<string, DirectionalVolumeCalibration>
