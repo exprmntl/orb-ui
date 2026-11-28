@@ -238,6 +238,19 @@ describe('Vapi adapter signals', () => {
     expect(client.stop).not.toHaveBeenCalled()
   })
 
+  it('replays an adapter-started call to its first subscriber', async () => {
+    const client = new FakeVapiClient()
+    const adapter = createVapiAdapter(client as unknown as VapiClientLike)
+    await adapter.start?.()
+    client.emit('call-start')
+    const listener = vi.fn()
+    const unsubscribe = adapter.subscribe(listener)
+    expect(listener).toHaveBeenCalledWith({ state: 'listening', inputVolume: 0, outputVolume: 0 })
+    unsubscribe()
+    client.emit('call-end')
+    expect(client.start).toBe(client.startMock)
+  })
+
   it('keeps Vapi connecting signals after another subscriber unsubscribes', async () => {
     const client = new FakeVapiClient()
     const adapter = createVapiAdapter(client as unknown as VapiClientLike)

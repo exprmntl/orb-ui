@@ -38,9 +38,10 @@ active.
 
 ## Session ownership
 
-The adapter can start and stop the configured assistant, and it also observes calls started
-elsewhere through the same Vapi client. Activating an interactive orb calls `vapi.start()` with the
-configured `assistantId`; activating it again calls `vapi.stop()`.
+Start through `adapter.start()` if the first orb may mount after the call begins. If your app calls
+`vapi.start()` directly, mount an orb or subscribe to the adapter first so it receives the call
+events. Activating an interactive orb starts the configured `assistantId`. Activating it again
+calls `vapi.stop()`.
 
 If the product already has labeled call controls, render a passive orb instead:
 
