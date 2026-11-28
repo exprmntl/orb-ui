@@ -1,5 +1,12 @@
 # orb-ui
 
+## 0.10.2
+
+### Patch Changes
+
+- 246a4c6: Align waveform-based microphone and playback activity across providers. Account for Deepgram’s scaled meter and Agora’s logarithmic meter, and calibrate ElevenLabs and LiveKit against recorded speech. Custom adapters can reuse the exported PCM_VOLUME_CALIBRATION profile.
+- 6ef8a5f: Allow pending OpenAI and Gemini calls to be stopped and restarted safely. Share Vapi state and meters across subscribers, and keep built-in and custom theme volumes within the finite 0–1 range.
+
 ## 0.10.1
 
 ### Patch Changes
